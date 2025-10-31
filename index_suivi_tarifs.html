@@ -1,0 +1,586 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>HotelManager Pro V2 – Expérience Client</title>
+    <link rel="icon" type="image/svg+xml" href="https://cdn.jsdelivr.net/npm/lucide-static@0.263.1/icons/sparkles.svg">
+    <link rel="stylesheet" href="style.css" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/feather-icons"></script>
+    <script src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vanta@0.5.24/dist/vanta.net.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        body { font-family: 'Inter', sans-serif; }
+        #vanta-bg { position: fixed; inset: 0; z-index: -2; }
+        .glass-panel { backdrop-filter: blur(18px); background: rgba(15, 23, 42, 0.68); border: 1px solid rgba(148, 163, 184, 0.25); border-radius: 1.5rem; box-shadow: 0 30px 60px -30px rgba(15, 23, 42, 0.85); }
+        .tab-button { position: relative; padding: 0.9rem 1.6rem; border-radius: 999px; background: transparent; color: rgba(226, 232, 240, 0.65); transition: all 0.3s ease; }
+        .tab-button.active { color: #f8fafc; background: rgba(79, 70, 229, 0.25); box-shadow: 0 10px 30px -15px rgba(79, 70, 229, 0.5); }
+        .form-control { width: 100%; border-radius: 1rem; padding: 0.85rem 1rem; border: 1px solid rgba(148, 163, 184, 0.25); background: rgba(15, 23, 42, 0.45); color: #e2e8f0; transition: all 0.3s ease; }
+        .form-control:focus { border-color: rgba(129, 140, 248, 0.65); box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15); outline: none; }
+        .btn-primary { display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem; padding: 0.85rem 1.4rem; border-radius: 1rem; background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%); color: white; font-weight: 600; transition: all 0.3s ease; }
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 18px 35px -20px rgba(99, 102, 241, 0.85); }
+        .btn-secondary { display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem; padding: 0.75rem 1.2rem; border-radius: 1rem; border: 1px solid rgba(148, 163, 184, 0.35); color: #cbd5f5; transition: all 0.3s ease; }
+        .btn-secondary:hover { background: rgba(148, 163, 184, 0.15); }
+        .badge { display: inline-flex; align-items: center; gap: 0.35rem; padding: 0.3rem 0.75rem; border-radius: 999px; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.2em; }
+        .badge-success { background: rgba(16, 185, 129, 0.15); color: #bbf7d0; border: 1px solid rgba(16, 185, 129, 0.3); }
+        .badge-warning { background: rgba(245, 158, 11, 0.15); color: #fcd34d; border: 1px solid rgba(245, 158, 11, 0.3); }
+        .badge-info { background: rgba(56, 189, 248, 0.15); color: #bae6fd; border: 1px solid rgba(56, 189, 248, 0.3); }
+        .toast { position: fixed; top: 2rem; right: 2rem; width: 320px; border-radius: 1rem; padding: 0.85rem 1rem; font-size: 0.875rem; display: flex; gap: 0.65rem; align-items: flex-start; border: 1px solid rgba(255, 255, 255, 0.1); backdrop-filter: blur(14px); box-shadow: 0 25px 35px -25px rgba(15, 23, 42, 0.85); opacity: 0; transform: translateY(-10px); transition: all 0.35s ease; }
+        .toast.show { opacity: 1; transform: translateY(0); }
+        .progress-bar { height: 6px; border-radius: 999px; background: rgba(148, 163, 184, 0.2); overflow: hidden; }
+        .progress-bar span { display: block; height: 100%; border-radius: inherit; background: linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%); transition: width 0.3s ease; }
+        .table-sticky thead th { position: sticky; top: 0; z-index: 5; background: rgba(15, 23, 42, 0.8); backdrop-filter: blur(12px); }
+        .pill { border-radius: 999px; padding: 0.35rem 0.75rem; font-size: 0.7rem; letter-spacing: 0.1em; text-transform: uppercase; }
+        .pill-success { background: rgba(34, 197, 94, 0.18); color: #86efac; }
+        .pill-danger { background: rgba(248, 113, 113, 0.18); color: #fca5a5; }
+        .pill-warning { background: rgba(251, 191, 36, 0.18); color: #fcd34d; }
+        .loading-spinner { border: 2px solid rgba(148, 163, 184, 0.2); border-radius: 50%; border-top: 2px solid #6366f1; width: 20px; height: 20px; animation: spin 1s linear infinite; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        .chart-container { position: relative; height: 400px; }
+    </style>
+</head>
+<body class="min-h-screen text-slate-100">
+    <div id="vanta-bg"></div>
+
+    <header class="px-6 py-12 sm:px-10">
+        <div class="mx-auto flex max-w-6xl flex-col gap-8 lg:flex-row lg:items-center lg:justify-between">
+            <div class="space-y-4">
+                <div class="inline-flex items-center gap-3 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-xs uppercase tracking-[0.45em] text-slate-300">
+                    <i data-feather="sparkles" class="h-4 w-4"></i>
+                    HotelManager Pro V2
+                </div>
+                <h1 class="text-4xl font-semibold leading-tight md:text-5xl">
+                    Gestion tarifaire immersive & simulation temps réel
+                </h1>
+                <p class="max-w-2xl text-base text-slate-300">
+                    Visualisez, simulez et exportez vos stratégies tarifaires en profitant d'une expérience nouvelle génération : effets glassmorphism, feedbacks instantanés et intégration totale avec le backend FastAPI.
+                </p>
+                <div class="flex flex-wrap items-center gap-3 text-xs">
+                    <span class="badge badge-success">Temps réel</span>
+                    <span class="badge badge-info">Glassmorphism</span>
+                    <span class="badge badge-warning">Monitoring intégré</span>
+                </div>
+            </div>
+            <div class="glass-panel max-w-sm p-6 text-sm text-slate-300">
+                <h2 class="text-lg font-semibold text-white">Connexion API sécurisée</h2>
+                <p class="mt-2 text-xs text-slate-400">Définissez votre endpoint backend pour synchroniser les données.</p>
+                <div class="mt-4 space-y-3">
+                    <label class="text-xs uppercase tracking-[0.25em] text-slate-400">Endpoint FastAPI</label>
+                    <input id="apiBase" type="url" class="form-control" placeholder="https://api.hotelmanager.fr" />
+                    <button id="saveEndpoint" class="btn-secondary w-full justify-center">Sauvegarder & synchroniser</button>
+                </div>
+                <p id="connectionStatus" class="mt-4 flex items-center gap-2 text-xs text-slate-400">
+                    <span class="inline-flex h-2 w-2 rounded-full bg-amber-400"></span>
+                    En attente de synchronisation
+                </p>
+            </div>
+        </div>
+    </header>
+
+    <main class="px-6 pb-24 sm:px-10">
+        <div class="mx-auto flex max-w-6xl flex-col gap-6">
+            <section class="glass-panel p-6 sm:p-10">
+                <div class="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
+                    <div class="flex-1 space-y-4">
+                        <label class="text-xs uppercase tracking-[0.25em] text-slate-400">Sélection de l'hôtel</label>
+                        <div class="flex flex-col gap-3 sm:flex-row">
+                            <select id="hotelSelect" class="form-control sm:max-w-xs" aria-label="Sélectionnez un hôtel"></select>
+                            <button id="loadHotel" class="btn-primary">
+                                <i data-feather="refresh-ccw" class="h-4 w-4"></i>
+                                Charger les données
+                            </button>
+                            <button id="exportExcel" class="btn-secondary">
+                                <i data-feather="download" class="h-4 w-4"></i>
+                                Export Excel
+                            </button>
+                        </div>
+                        <p id="hotelStatus" class="text-sm text-slate-400">
+                            Choisissez un hôtel pour activer les modules de simulation et disponibilités.
+                        </p>
+                    </div>
+                    <div class="flex items-center gap-4 text-sm text-slate-300">
+                        <span class="pill pill-success">API active</span>
+                        <span class="pill pill-warning">Multi-hôtel</span>
+                        <span class="pill pill-success">Temps réel</span>
+                    </div>
+                </div>
+
+                <div class="mt-8 flex flex-wrap gap-3">
+                    <button class="tab-button active" data-target="tabSimulator">
+                        <i data-feather="sliders" class="h-4 w-4"></i>
+                        Simulation tarifaire
+                    </button>
+                    <button class="tab-button" data-target="tabAvailability">
+                        <i data-feather="calendar" class="h-4 w-4"></i>
+                        Gestion des disponibilités
+                    </button>
+                    <button class="tab-button" data-target="tabPriceTracking">
+                        <i data-feather="trending-up" class="h-4 w-4"></i>
+                        Suivi des tarifs
+                    </button>
+                    <button class="tab-button" data-target="tabAnalytics">
+                        <i data-feather="bar-chart-2" class="h-4 w-4"></i>
+                        Insights & partenaires
+                    </button>
+                </div>
+
+                <div class="mt-8 space-y-10">
+                    <!-- Onglet Simulation tarifaire -->
+                    <section id="tabSimulator" class="tab-section space-y-6">
+                        <div class="grid gap-6 lg:grid-cols-3">
+                            <div class="glass-panel p-6">
+                                <h3 class="text-lg font-semibold">Paramètres</h3>
+                                <p class="mt-2 text-xs text-slate-400">Configurez la simulation multi-partenaire en temps réel.</p>
+                                <form id="simulationForm" class="mt-4 space-y-4">
+                                    <div>
+                                        <label class="text-xs uppercase tracking-[0.25em] text-slate-400">Partenaire</label>
+                                        <select id="simPartner" class="form-control"></select>
+                                    </div>
+                                    <div>
+                                        <label class="text-xs uppercase tracking-[0.25em] text-slate-400">Type de chambre</label>
+                                        <select id="simRoom" class="form-control"></select>
+                                    </div>
+                                    <div>
+                                        <label class="text-xs uppercase tracking-[0.25em] text-slate-400">Plan tarifaire</label>
+                                        <select id="simPlan" class="form-control"></select>
+                                    </div>
+                                    <div class="grid gap-3 sm:grid-cols-2">
+                                        <div>
+                                            <label class="text-xs uppercase tracking-[0.25em] text-slate-400">Arrivée</label>
+                                            <input id="simStart" type="date" class="form-control" />
+                                        </div>
+                                        <div>
+                                            <label class="text-xs uppercase tracking-[0.25em] text-slate-400">Départ</label>
+                                            <input id="simEnd" type="date" class="form-control" />
+                                        </div>
+                                    </div>
+                                    <div class="grid gap-3 sm:grid-cols-2">
+                                        <label class="inline-flex items-center gap-3 text-sm text-slate-300">
+                                            <input id="applyCommission" type="checkbox" class="h-4 w-4 rounded border-slate-500 bg-transparent text-indigo-500 focus:ring-indigo-400" checked />
+                                            Appliquer commission partenaire</input>
+                                        </label>
+                                    </div>
+                                    <button id="runSimulation" type="submit" class="btn-primary w-full justify-center">
+                                        <i data-feather="play" class="h-4 w-4"></i>
+                                        Lancer la simulation
+                                    </button>
+                                </form>
+                            </div>
+                            <div class="glass-panel p-6 lg:col-span-2">
+                                <h3 class="text-lg font-semibold">Résultats de simulation</h3>
+                                <div id="simulationResults" class="mt-4 space-y-4">
+                                    <div class="text-center text-slate-400 py-8">
+                                        Configurez les paramètres et lancez la simulation pour voir les résultats.
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- Onglet Gestion des disponibilités -->
+                    <section id="tabAvailability" class="tab-section hidden space-y-6">
+                        <div class="glass-panel p-6">
+                            <h3 class="text-lg font-semibold">Calendrier des disponibilités</h3>
+                            <p class="mt-2 text-xs text-slate-400">Visualisez et gérez les disponibilités par type de chambre.</p>
+                            <div id="availabilityCalendar" class="mt-4">
+                                <div class="text-center text-slate-400 py-8">
+                                    Sélectionnez un hôtel et lancez le chargement des disponibilités.
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- Nouvel onglet : Suivi des tarifs -->
+                    <section id="tabPriceTracking" class="tab-section hidden space-y-6">
+                        <div class="grid gap-6 lg:grid-cols-4">
+                            <div class="glass-panel p-6">
+                                <h3 class="text-lg font-semibold">Paramètres de recherche</h3>
+                                <p class="mt-2 text-xs text-slate-400">Configurez les critères pour le suivi tarifaire.</p>
+                                <form id="priceTrackingForm" class="mt-4 space-y-4">
+                                    <div class="grid gap-3 sm:grid-cols-2">
+                                        <div>
+                                            <label class="text-xs uppercase tracking-[0.25em] text-slate-400">Date début</label>
+                                            <input id="trackStart" type="date" class="form-control" />
+                                        </div>
+                                        <div>
+                                            <label class="text-xs uppercase tracking-[0.25em] text-slate-400">Date fin</label>
+                                            <input id="trackEnd" type="date" class="form-control" />
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <label class="text-xs uppercase tracking-[0.25em] text-slate-400">Type de chambre</label>
+                                        <select id="trackRoom" class="form-control">
+                                            <option value="Double Classique">Double Classique</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label class="text-xs uppercase tracking-[0.25em] text-slate-400">Plan tarifaire</label>
+                                        <select id="trackPlan" class="form-control">
+                                            <option value="OTA RO FLEX">OTA RO FLEX</option>
+                                        </select>
+                                    </div>
+                                    <button id="searchPrices" type="submit" class="btn-primary w-full justify-center">
+                                        <i data-feather="search" class="h-4 w-4"></i>
+                                        Lancer la recherche
+                                    </button>
+                                </form>
+                            </div>
+                            <div class="glass-panel p-6 lg:col-span-3">
+                                <div class="flex items-center justify-between mb-4">
+                                    <h3 class="text-lg font-semibold">Résultats du suivi tarifaire</h3>
+                                    <div id="priceLoading" class="hidden flex items-center gap-2 text-slate-400">
+                                        <div class="loading-spinner"></div>
+                                        <span>Chargement des données...</span>
+                                    </div>
+                                </div>
+                                
+                                <!-- Tableau des tarifs -->
+                                <div id="priceTable" class="overflow-hidden">
+                                    <div class="text-center text-slate-400 py-8">
+                                        Configurez les paramètres et lancez la recherche pour voir les tarifs.
+                                    </div>
+                                </div>
+
+                                <!-- Graphique d'évolution -->
+                                <div class="mt-6">
+                                    <h4 class="text-md font-semibold mb-3">Évolution tarifaire</h4>
+                                    <div class="chart-container">
+                                        <canvas id="priceChart"></canvas>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- Onglet Analytics -->
+                    <section id="tabAnalytics" class="tab-section hidden space-y-6">
+                        <div class="glass-panel p-6">
+                            <h3 class="text-lg font-semibold">Insights & partenaires</h3>
+                            <div id="analyticsContent" class="mt-4 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                                <div class="text-center text-slate-400 py-8">
+                                    Analytics en développement.
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <!-- Toast notifications -->
+    <div id="toast" class="toast hidden">
+        <i data-feather="check-circle" class="h-5 w-5 text-green-400 mt-0.5"></i>
+        <div class="flex-1">
+            <p id="toastMessage" class="font-medium"></p>
+            <p id="toastDescription" class="text-xs text-slate-400 mt-1"></p>
+        </div>
+        <button id="closeToast" class="text-slate-400 hover:text-white">
+            <i data-feather="x" class="h-4 w-4"></i>
+        </button>
+    </div>
+
+    <script>
+        // Configuration globale
+        const API_BASE = 'http://localhost:8080';
+        
+        // Gestion des onglets
+        document.querySelectorAll('.tab-button').forEach(button => {
+            button.addEventListener('click', () => {
+                const target = button.dataset.target;
+                
+                // Désactiver tous les onglets
+                document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
+                document.querySelectorAll('.tab-section').forEach(section => section.classList.add('hidden'));
+                
+                // Activer l'onglet sélectionné
+                button.classList.add('active');
+                document.getElementById(target).classList.remove('hidden');
+            });
+        });
+
+        // Gestion des endpoints API
+        document.getElementById('saveEndpoint').addEventListener('click', () => {
+            const apiBase = document.getElementById('apiBase').value;
+            if (apiBase) {
+                localStorage.setItem('apiBase', apiBase);
+                document.getElementById('connectionStatus').innerHTML = '<span class="inline-flex h-2 w-2 rounded-full bg-green-400"></span> Endpoint configuré';
+                showToast('Configuration sauvegardée', 'Endpoint API configuré avec succès');
+            }
+        });
+
+        // Charger l'endpoint sauvegardé
+        const savedApiBase = localStorage.getItem('apiBase');
+        if (savedApiBase) {
+            document.getElementById('apiBase').value = savedApiBase;
+        }
+
+        // Fonction pour afficher les toasts
+        function showToast(message, description = '') {
+            const toast = document.getElementById('toast');
+            const toastMessage = document.getElementById('toastMessage');
+            const toastDescription = document.getElementById('toastDescription');
+            
+            toastMessage.textContent = message;
+            toastDescription.textContent = description;
+            toast.classList.remove('hidden');
+            toast.classList.add('show');
+            
+            setTimeout(() => {
+                toast.classList.remove('show');
+                setTimeout(() => toast.classList.add('hidden'), 350);
+            }, 4000);
+        }
+
+        // Gestion du formulaire de suivi des tarifs
+        document.getElementById('priceTrackingForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const startDate = document.getElementById('trackStart').value;
+            const endDate = document.getElementById('trackEnd').value;
+            const room = document.getElementById('trackRoom').value;
+            const plan = document.getElementById('trackPlan').value;
+            const hotelId = document.getElementById('hotelSelect').value;
+            
+            if (!hotelId) {
+                showToast('Erreur', 'Veuillez d\'abord sélectionner un hôtel');
+                return;
+            }
+            
+            if (!startDate || !endDate) {
+                showToast('Erreur', 'Veuillez sélectionner les dates de début et fin');
+                return;
+            }
+            
+            await searchPriceHistory(hotelId, startDate, endDate, room, plan);
+        });
+
+        // Fonction pour rechercher l'historique des prix
+        async function searchPriceHistory(hotelId, startDate, endDate, roomType, planName) {
+            const loading = document.getElementById('priceLoading');
+            const table = document.getElementById('priceTable');
+            
+            loading.classList.remove('hidden');
+            table.innerHTML = '<div class="text-center py-8"><div class="loading-spinner mx-auto"></div></div>';
+            
+            try {
+                const response = await fetch(`${API_BASE}/price-tracking/${hotelId}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        start_date: startDate,
+                        end_date: endDate,
+                        room_type: roomType,
+                        plan_name: planName
+                    })
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`Erreur HTTP: ${response.status}`);
+                }
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    displayPriceTable(data.price_data);
+                    updatePriceChart(data.price_data, roomType, planName);
+                    showToast('Recherche effectuée', `${data.price_data.length} tarifs trouvés`);
+                } else {
+                    throw new Error(data.error || 'Erreur inconnue');
+                }
+                
+            } catch (error) {
+                console.error('Erreur lors de la recherche:', error);
+                table.innerHTML = '<div class="text-center text-red-400 py-8">Erreur lors du chargement des données</div>';
+                showToast('Erreur', 'Impossible de charger les données de tarifs');
+            } finally {
+                loading.classList.add('hidden');
+            }
+        }
+
+        // Fonction pour afficher le tableau des tarifs
+        function displayPriceTable(priceData) {
+            const table = document.getElementById('priceTable');
+            
+            if (!priceData || priceData.length === 0) {
+                table.innerHTML = '<div class="text-center text-slate-400 py-8">Aucun tarif trouvé pour cette période</div>';
+                return;
+            }
+            
+            let html = `
+                <div class="overflow-x-auto">
+                    <table class="table-sticky min-w-full text-sm">
+                        <thead>
+                            <tr class="border-b border-slate-600">
+                                <th class="text-left py-3 px-4">Date</th>
+                                <th class="text-left py-3 px-4">Type de chambre</th>
+                                <th class="text-left py-3 px-4">Plan tarifaire</th>
+                                <th class="text-left py-3 px-4">Prix</th>
+                                <th class="text-left py-3 px-4">Commission</th>
+                                <th class="text-left py-3 px-4">Prix final</th>
+                                <th class="text-left py-3 px-4">Statut</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+            `;
+            
+            priceData.forEach(item => {
+                const statusClass = item.is_available ? 'pill-success' : 'pill-danger';
+                const statusText = item.is_available ? 'Disponible' : 'Indisponible';
+                
+                html += `
+                    <tr class="border-b border-slate-700 hover:bg-slate-700/30">
+                        <td class="py-3 px-4">${formatDate(item.date)}</td>
+                        <td class="py-3 px-4">${item.room_type}</td>
+                        <td class="py-3 px-4">${item.plan_name}</td>
+                        <td class="py-3 px-4 font-medium">${formatPrice(item.base_price)}</td>
+                        <td class="py-3 px-4 text-amber-400">${formatPrice(item.commission)}</td>
+                        <td class="py-3 px-4 font-semibold text-green-400">${formatPrice(item.final_price)}</td>
+                        <td class="py-3 px-4">
+                            <span class="pill ${statusClass}">${statusText}</span>
+                        </td>
+                    </tr>
+                `;
+            });
+            
+            html += `
+                        </tbody>
+                    </table>
+                </div>
+            `;
+            
+            table.innerHTML = html;
+        }
+
+        // Fonction pour mettre à jour le graphique
+        let priceChart = null;
+        
+        function updatePriceChart(priceData, roomType, planName) {
+            const ctx = document.getElementById('priceChart').getContext('2d');
+            
+            if (priceChart) {
+                priceChart.destroy();
+            }
+            
+            const labels = priceData.map(item => formatDate(item.date));
+            const prices = priceData.map(item => item.final_price);
+            
+            priceChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: `${roomType} - ${planName}`,
+                        data: prices,
+                        borderColor: '#6366f1',
+                        backgroundColor: 'rgba(99, 102, 241, 0.1)',
+                        borderWidth: 2,
+                        fill: true,
+                        tension: 0.4,
+                        pointBackgroundColor: '#6366f1',
+                        pointBorderColor: '#fff',
+                        pointBorderWidth: 2,
+                        pointRadius: 4,
+                        pointHoverRadius: 6
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            labels: {
+                                color: '#e2e8f0',
+                                font: {
+                                    family: 'Inter'
+                                }
+                            }
+                        },
+                        tooltip: {
+                            backgroundColor: 'rgba(15, 23, 42, 0.9)',
+                            titleColor: '#f8fafc',
+                            bodyColor: '#e2e8f0',
+                            borderColor: 'rgba(148, 163, 184, 0.25)',
+                            borderWidth: 1,
+                            callbacks: {
+                                label: function(context) {
+                                    return `${context.dataset.label}: ${formatPrice(context.parsed.y)}`;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            ticks: {
+                                color: '#94a3b8',
+                                font: {
+                                    family: 'Inter'
+                                }
+                            },
+                            grid: {
+                                color: 'rgba(148, 163, 184, 0.1)'
+                            }
+                        },
+                        y: {
+                            ticks: {
+                                color: '#94a3b8',
+                                font: {
+                                    family: 'Inter'
+                                },
+                                callback: function(value) {
+                                    return formatPrice(value);
+                                }
+                            },
+                            grid: {
+                                color: 'rgba(148, 163, 184, 0.1)'
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Fonctions utilitaires
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            return date.toLocaleDateString('fr-FR', {
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric'
+            });
+        }
+
+        function formatPrice(price) {
+            return new Intl.NumberFormat('fr-FR', {
+                style: 'currency',
+                currency: 'EUR'
+            }).format(price);
+        }
+
+        // Initialisation
+        document.addEventListener('DOMContentLoaded', () => {
+            feather.replace();
+            
+            // Charger l'endpoint sauvegardé
+            const savedApiBase = localStorage.getItem('apiBase');
+            if (savedApiBase) {
+                document.getElementById('apiBase').value = savedApiBase;
+            }
+            
+            // Définir les dates par défaut (30 derniers jours)
+            const today = new Date();
+            const thirtyDaysAgo = new Date(today.getTime() - 30 * 24 * 60 * 60 * 1000);
+            
+            document.getElementById('trackStart').value = thirtyDaysAgo.toISOString().split('T')[0];
+            document.getElementById('trackEnd').value = today.toISOString().split('T')[0];
+            document.getElementById('simStart').value = thirtyDaysAgo.toISOString().split('T')[0];
+            document.getElementById('simEnd').value = today.toISOString().split('T')[0];
+        });
+    </script>
+</body>
+</html>

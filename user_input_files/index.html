@@ -1,0 +1,640 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>HotelManager Pro V2 – Expérience Client</title>
+    <link rel="icon" type="image/svg+xml" href="https://cdn.jsdelivr.net/npm/lucide-static@0.263.1/icons/sparkles.svg">
+    <link rel="stylesheet" href="style.css" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/feather-icons"></script>
+    <script src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vanta@0.5.24/dist/vanta.net.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        body { font-family: 'Inter', sans-serif; }
+        #vanta-bg { position: fixed; inset: 0; z-index: -2; }
+        .glass-panel { backdrop-filter: blur(18px); background: rgba(15, 23, 42, 0.68); border: 1px solid rgba(148, 163, 184, 0.25); border-radius: 1.5rem; box-shadow: 0 30px 60px -30px rgba(15, 23, 42, 0.85); }
+        .tab-button { position: relative; padding: 0.9rem 1.6rem; border-radius: 999px; background: transparent; color: rgba(226, 232, 240, 0.65); transition: all 0.3s ease; }
+        .tab-button.active { color: #f8fafc; background: rgba(79, 70, 229, 0.25); box-shadow: 0 10px 30px -15px rgba(79, 70, 229, 0.5); }
+        .form-control { width: 100%; border-radius: 1rem; padding: 0.85rem 1rem; border: 1px solid rgba(148, 163, 184, 0.25); background: rgba(15, 23, 42, 0.45); color: #e2e8f0; transition: all 0.3s ease; }
+        .form-control:focus { border-color: rgba(129, 140, 248, 0.65); box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15); outline: none; }
+        .btn-primary { display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem; padding: 0.85rem 1.4rem; border-radius: 1rem; background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%); color: white; font-weight: 600; transition: all 0.3s ease; }
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 18px 35px -20px rgba(99, 102, 241, 0.85); }
+        .btn-secondary { display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem; padding: 0.75rem 1.2rem; border-radius: 1rem; border: 1px solid rgba(148, 163, 184, 0.35); color: #cbd5f5; transition: all 0.3s ease; }
+        .btn-secondary:hover { background: rgba(148, 163, 184, 0.15); }
+        .badge { display: inline-flex; align-items: center; gap: 0.35rem; padding: 0.3rem 0.75rem; border-radius: 999px; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.2em; }
+        .badge-success { background: rgba(16, 185, 129, 0.15); color: #bbf7d0; border: 1px solid rgba(16, 185, 129, 0.3); }
+        .badge-warning { background: rgba(245, 158, 11, 0.15); color: #fcd34d; border: 1px solid rgba(245, 158, 11, 0.3); }
+        .badge-info { background: rgba(56, 189, 248, 0.15); color: #bae6fd; border: 1px solid rgba(56, 189, 248, 0.3); }
+        .toast { position: fixed; top: 2rem; right: 2rem; width: 320px; border-radius: 1rem; padding: 0.85rem 1rem; font-size: 0.875rem; display: flex; gap: 0.65rem; align-items: flex-start; border: 1px solid rgba(255, 255, 255, 0.1); backdrop-filter: blur(14px); box-shadow: 0 25px 35px -25px rgba(15, 23, 42, 0.85); opacity: 0; transform: translateY(-10px); transition: all 0.35s ease; }
+        .toast.show { opacity: 1; transform: translateY(0); }
+        .progress-bar { height: 6px; border-radius: 999px; background: rgba(148, 163, 184, 0.2); overflow: hidden; }
+        .progress-bar span { display: block; height: 100%; border-radius: inherit; background: linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%); transition: width 0.3s ease; }
+        .table-sticky thead th { position: sticky; top: 0; z-index: 5; background: rgba(15, 23, 42, 0.8); backdrop-filter: blur(12px); }
+        .pill { border-radius: 999px; padding: 0.35rem 0.75rem; font-size: 0.7rem; letter-spacing: 0.1em; text-transform: uppercase; }
+        .pill-success { background: rgba(34, 197, 94, 0.18); color: #86efac; }
+        .pill-danger { background: rgba(248, 113, 113, 0.18); color: #fca5a5; }
+        .pill-warning { background: rgba(251, 191, 36, 0.18); color: #fcd34d; }
+    </style>
+</head>
+<body class="min-h-screen text-slate-100">
+    <div id="vanta-bg"></div>
+
+    <header class="px-6 py-12 sm:px-10">
+        <div class="mx-auto flex max-w-6xl flex-col gap-8 lg:flex-row lg:items-center lg:justify-between">
+            <div class="space-y-4">
+                <div class="inline-flex items-center gap-3 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-xs uppercase tracking-[0.45em] text-slate-300">
+                    <i data-feather="sparkles" class="h-4 w-4"></i>
+                    HotelManager Pro V2
+                </div>
+                <h1 class="text-4xl font-semibold leading-tight md:text-5xl">
+                    Gestion tarifaire immersive & simulation temps réel
+                </h1>
+                <p class="max-w-2xl text-base text-slate-300">
+                    Visualisez, simulez et exportez vos stratégies tarifaires en profitant d'une expérience nouvelle génération : effets glassmorphism, feedbacks instantanés et intégration totale avec le backend FastAPI.
+                </p>
+                <div class="flex flex-wrap items-center gap-3 text-xs">
+                    <span class="badge badge-success">Temps réel</span>
+                    <span class="badge badge-info">Glassmorphism</span>
+                    <span class="badge badge-warning">Monitoring intégré</span>
+                </div>
+            </div>
+            <div class="glass-panel max-w-sm p-6 text-sm text-slate-300">
+                <h2 class="text-lg font-semibold text-white">Connexion API sécurisée</h2>
+                <p class="mt-2 text-xs text-slate-400">Définissez votre endpoint backend pour synchroniser les données.</p>
+                <div class="mt-4 space-y-3">
+                    <label class="text-xs uppercase tracking-[0.25em] text-slate-400">Endpoint FastAPI</label>
+                    <input id="apiBase" type="url" class="form-control" placeholder="https://api.hotelmanager.fr" />
+                    <button id="saveEndpoint" class="btn-secondary w-full justify-center">Sauvegarder & synchroniser</button>
+                </div>
+                <p id="connectionStatus" class="mt-4 flex items-center gap-2 text-xs text-slate-400">
+                    <span class="inline-flex h-2 w-2 rounded-full bg-amber-400"></span>
+                    En attente de synchronisation
+                </p>
+            </div>
+        </div>
+    </header>
+
+    <main class="px-6 pb-24 sm:px-10">
+        <div class="mx-auto flex max-w-6xl flex-col gap-6">
+            <section class="glass-panel p-6 sm:p-10">
+                <div class="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
+                    <div class="flex-1 space-y-4">
+                        <label class="text-xs uppercase tracking-[0.25em] text-slate-400">Sélection de l'hôtel</label>
+                        <div class="flex flex-col gap-3 sm:flex-row">
+                            <select id="hotelSelect" class="form-control sm:max-w-xs" aria-label="Sélectionnez un hôtel"></select>
+                            <button id="loadHotel" class="btn-primary">
+                                <i data-feather="refresh-ccw" class="h-4 w-4"></i>
+                                Charger les données
+                            </button>
+                            <button id="exportExcel" class="btn-secondary">
+                                <i data-feather="download" class="h-4 w-4"></i>
+                                Export Excel
+                            </button>
+                        </div>
+                        <p id="hotelStatus" class="text-sm text-slate-400">
+                            Choisissez un hôtel pour activer les modules de simulation et disponibilités.
+                        </p>
+                    </div>
+                    <div class="flex items-center gap-4 text-sm text-slate-300">
+                        <div class="text-right">
+                            <p class="text-xs uppercase tracking-[0.25em] text-slate-400">Dernière mise à jour</p>
+                            <p id="lastUpdate">—</p>
+                        </div>
+                        <div class="text-right">
+                            <p class="text-xs uppercase tracking-[0.25em] text-slate-400">Fichier de données</p>
+                            <p id="dataSummary">—</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-8 flex flex-wrap gap-3">
+                    <button class="tab-button active" data-target="tabSimulator">
+                        <i data-feather="sliders" class="h-4 w-4"></i>
+                        Simulation tarifaire
+                    </button>
+                    <button class="tab-button" data-target="tabAvailability">
+                        <i data-feather="calendar" class="h-4 w-4"></i>
+                        Gestion des disponibilités
+                    </button>
+                    <button class="tab-button" data-target="tabAnalytics">
+                        <i data-feather="bar-chart-2" class="h-4 w-4"></i>
+                        Insights & partenaires
+                    </button>
+                </div>
+
+                <div class="mt-8 space-y-10">
+                    <section id="tabSimulator" class="tab-section space-y-6">
+                        <div class="grid gap-6 lg:grid-cols-3">
+                            <div class="glass-panel p-6">
+                                <h3 class="text-lg font-semibold">Paramètres</h3>
+                                <p class="mt-2 text-xs text-slate-400">Configurez la simulation multi-partenaire en temps réel.</p>
+                                <form id="simulationForm" class="mt-4 space-y-4">
+                                    <div>
+                                        <label class="text-xs uppercase tracking-[0.25em] text-slate-400">Partenaire</label>
+                                        <select id="simPartner" class="form-control"></select>
+                                    </div>
+                                    <div>
+                                        <label class="text-xs uppercase tracking-[0.25em] text-slate-400">Type de chambre</label>
+                                        <select id="simRoom" class="form-control"></select>
+                                    </div>
+                                    <div>
+                                        <label class="text-xs uppercase tracking-[0.25em] text-slate-400">Plan tarifaire</label>
+                                        <select id="simPlan" class="form-control"></select>
+                                    </div>
+                                    <div class="grid gap-3 sm:grid-cols-2">
+                                        <div>
+                                            <label class="text-xs uppercase tracking-[0.25em] text-slate-400">Arrivée</label>
+                                            <input id="simStart" type="date" class="form-control" />
+                                        </div>
+                                        <div>
+                                            <label class="text-xs uppercase tracking-[0.25em] text-slate-400">Départ</label>
+                                            <input id="simEnd" type="date" class="form-control" />
+                                        </div>
+                                    </div>
+                                    <div class="grid gap-3 sm:grid-cols-2">
+                                        <label class="inline-flex items-center gap-3 text-sm text-slate-300">
+                                            <input id="applyCommission" type="checkbox" class="h-4 w-4 rounded border-slate-500 bg-transparent text-indigo-500 focus:ring-indigo-400" checked />
+                                            Appliquer commission partenaire
+                                        </label>
+                                        <label class="inline-flex items-center gap-3 text-sm text-slate-300">
+                                            <input id="applyDiscount" type="checkbox" class="h-4 w-4 rounded border-slate-500 bg-transparent text-indigo-500 focus:ring-indigo-400" checked />
+                                            Activer remise partenaire
+                                        </label>
+                                    </div>
+                                    <div>
+                                        <label class="text-xs uppercase tracking-[0.25em] text-slate-400">Promotion (%)</label>
+                                        <input id="promoDiscount" type="number" min="0" max="100" step="1" value="0" class="form-control" />
+                                    </div>
+                                    <button type="submit" class="btn-primary w-full justify-center">
+                                        <i data-feather="play" class="h-4 w-4"></i>
+                                        Lancer la simulation
+                                    </button>
+                                </form>
+                            </div>
+                            <div class="glass-panel p-6 lg:col-span-2">
+                                <div class="flex flex-wrap items-center justify-between gap-3">
+                                    <h3 class="text-lg font-semibold">Résultats détaillés</h3>
+                                    <div id="simulationMeta" class="flex flex-wrap items-center gap-3 text-xs text-slate-400"></div>
+                                </div>
+                                <div id="simulationLoading" class="hidden py-10 text-center text-slate-400">
+                                    <div class="mx-auto mb-4 h-12 w-12 animate-spin rounded-full border-4 border-slate-600 border-t-indigo-400"></div>
+                                    Calcul de la simulation avancée...
+                                </div>
+                                <div id="simulationResults" class="hidden space-y-6 text-sm">
+                                    <div class="grid gap-4 sm:grid-cols-2">
+                                        <div class="glass-panel bg-white/5 p-4 text-slate-200">
+                                            <p class="text-xs uppercase tracking-[0.25em] text-slate-400">Total net</p>
+                                            <p id="simNet" class="text-3xl font-semibold">—</p>
+                                            <p class="mt-1 text-xs text-slate-500">Après remises et commissions</p>
+                                        </div>
+                                        <div class="glass-panel bg-white/5 p-4 text-slate-200">
+                                            <p class="text-xs uppercase tracking-[0.25em] text-slate-400">Remises cumulées</p>
+                                            <p id="simDiscounts" class="text-3xl font-semibold">—</p>
+                                            <p class="mt-1 text-xs text-slate-500">Partenaire + promo</p>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <div class="progress-bar">
+                                            <span id="occupancyProgress" style="width:0%"></span>
+                                        </div>
+                                        <p id="progressLabel" class="mt-2 text-xs text-slate-400"></p>
+                                    </div>
+                                    <div class="overflow-hidden rounded-2xl border border-white/10">
+                                        <table class="table-sticky min-w-full text-xs">
+                                            <thead class="uppercase tracking-[0.3em] text-slate-400">
+                                                <tr>
+                                                    <th class="px-4 py-3 text-left">Date</th>
+                                                    <th class="px-4 py-3 text-right">Prix brut</th>
+                                                    <th class="px-4 py-3 text-right">Remise partenaire</th>
+                                                    <th class="px-4 py-3 text-right">Remise promo</th>
+                                                    <th class="px-4 py-3 text-right">Commission</th>
+                                                    <th class="px-4 py-3 text-right">Prix net</th>
+                                                    <th class="px-4 py-3 text-center">Stock</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="simulationTable" class="divide-y divide-white/5 text-slate-200"></tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <section id="tabAvailability" class="tab-section hidden space-y-6">
+                        <div class="glass-panel p-6">
+                            <h3 class="text-lg font-semibold">Disponibilités dynamiques</h3>
+                            <p class="mt-2 text-xs text-slate-400">Sélection multiple de chambres, périodes personnalisables et indicateurs couleur.</p>
+                            <form id="availabilityForm" class="mt-4 grid gap-4 md:grid-cols-4">
+                                <div class="md:col-span-2">
+                                    <label class="text-xs uppercase tracking-[0.25em] text-slate-400">Chambres</label>
+                                    <select id="availabilityRooms" class="form-control" multiple size="4"></select>
+                                </div>
+                                <div>
+                                    <label class="text-xs uppercase tracking-[0.25em] text-slate-400">Début</label>
+                                    <input id="availabilityStart" type="date" class="form-control" />
+                                </div>
+                                <div>
+                                    <label class="text-xs uppercase tracking-[0.25em] text-slate-400">Fin</label>
+                                    <input id="availabilityEnd" type="date" class="form-control" />
+                                </div>
+                                <div class="md:col-span-4 flex justify-end gap-3">
+                                    <button type="button" id="resetAvailability" class="btn-secondary">
+                                        <i data-feather="rotate-ccw" class="h-4 w-4"></i>
+                                        Réinitialiser
+                                    </button>
+                                    <button type="submit" class="btn-primary">
+                                        <i data-feather="search" class="h-4 w-4"></i>
+                                        Calculer les disponibilités
+                                    </button>
+                                </div>
+                            </form>
+                            <div id="availabilityResults" class="mt-6 hidden space-y-6">
+                                <div class="overflow-auto rounded-2xl border border-white/10">
+                                    <table class="min-w-full text-xs text-slate-200">
+                                        <thead class="uppercase tracking-[0.3em] text-slate-400">
+                                            <tr id="availabilityHeader"></tr>
+                                        </thead>
+                                        <tbody id="availabilityBody" class="divide-y divide-white/5"></tbody>
+                                    </table>
+                                </div>
+                                <p id="availabilityLegend" class="text-xs text-slate-400"></p>
+                            </div>
+                        </div>
+                    </section>
+
+                    <section id="tabAnalytics" class="tab-section hidden space-y-6">
+                        <div class="glass-panel p-6">
+                            <h3 class="text-lg font-semibold">Insights partenaires & configuration</h3>
+                            <div class="mt-4 grid gap-4 md:grid-cols-2" id="partnerInsights"></div>
+                        </div>
+                    </section>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <div id="toastContainer" class="pointer-events-none fixed top-6 right-6 z-50 flex w-80 flex-col gap-3"></div>
+
+    <script>
+        let vantaEffect;
+        document.addEventListener('DOMContentLoaded', () => {
+            vantaEffect = VANTA.NET({
+                el: '#vanta-bg',
+                mouseControls: true,
+                touchControls: true,
+                color: 0x3b82f6,
+                backgroundColor: 0x020617,
+                maxDistance: 25,
+                spacing: 18,
+            });
+        });
+
+        const API_KEY = 'hmpro.frontend.api';
+        const apiInput = document.getElementById('apiBase');
+        const savedEndpoint = localStorage.getItem(API_KEY) || 'http://localhost:8080';
+        apiInput.value = savedEndpoint;
+
+        const getApi = () => (localStorage.getItem(API_KEY) || savedEndpoint).replace(/\/$/, '');
+        const toastContainer = document.getElementById('toastContainer');
+
+        const showToast = (message, type = 'info') => {
+            const palette = {
+                success: 'border-emerald-400/40 bg-emerald-500/10 text-emerald-200',
+                error: 'border-rose-400/40 bg-rose-500/10 text-rose-200',
+                warning: 'border-amber-400/40 bg-amber-500/10 text-amber-200',
+                info: 'border-sky-400/40 bg-sky-500/10 text-sky-200',
+            };
+            const toast = document.createElement('div');
+            toast.className = `toast pointer-events-auto ${palette[type] || palette.info}`;
+            toast.innerHTML = `<i data-feather="bell" class="mt-1 h-4 w-4"></i><span>${message}</span>`;
+            toastContainer.appendChild(toast);
+            feather.replace({ class: 'h-4 w-4' });
+            requestAnimationFrame(() => toast.classList.add('show'));
+            setTimeout(() => toast.classList.remove('show'), 4000);
+            setTimeout(() => toast.remove(), 4600);
+        };
+
+        const state = {
+            hotelId: null,
+            hotelData: null,
+            hotelConfig: null,
+            simulation: null,
+        };
+
+        const updateConnectionStatus = (status, text) => {
+            const statusEl = document.getElementById('connectionStatus');
+            statusEl.innerHTML = `<span class="inline-flex h-2 w-2 rounded-full bg-${status === 'ok' ? 'emerald' : status === 'warn' ? 'amber' : 'rose'}-400"></span>${text}`;
+        };
+
+        const fetchJSON = async (path, options = {}) => {
+            const response = await fetch(`${getApi()}${path}`, options);
+            if (!response.ok) {
+                const payload = await response.json().catch(() => ({}));
+                const error = new Error(payload.detail || 'Erreur API');
+                error.status = response.status;
+                throw error;
+            }
+            return response.json();
+        };
+
+        const loadHotels = async () => {
+            try {
+                updateConnectionStatus('warn', 'Synchronisation en cours...');
+                const hotels = await fetchJSON('/hotels');
+                const select = document.getElementById('hotelSelect');
+                select.innerHTML = '<option value="">— Sélectionnez un hôtel —</option>';
+                hotels.forEach((hotel) => {
+                    const option = document.createElement('option');
+                    option.value = hotel.hotel_id;
+                    option.textContent = hotel.name ? `${hotel.name} (${hotel.hotel_id})` : hotel.hotel_id;
+                    select.appendChild(option);
+                });
+                updateConnectionStatus('ok', `${hotels.length} hôtels disponibles`);
+                showToast('Liste des hôtels synchronisée', 'success');
+            } catch (error) {
+                updateConnectionStatus('error', error.message);
+                showToast(error.message, 'error');
+            }
+        };
+
+        const populatePartners = (config) => {
+            const partnerSelect = document.getElementById('simPartner');
+            partnerSelect.innerHTML = '';
+            partnerSelect.appendChild(new Option('Direct (0%)', ''));
+            const partners = config?.partners || {};
+            Object.entries(partners).forEach(([name, value]) => {
+                const commission = value.commission ? ` • ${value.commission}%` : '';
+                partnerSelect.appendChild(new Option(`${name}${commission}`, name));
+            });
+            document.getElementById('partnerInsights').innerHTML = Object.entries(partners).map(([name, data]) => {
+                return `<div class="glass-panel p-4 text-sm text-slate-200">
+                    <div class="flex items-center justify-between">
+                        <span class="font-semibold text-white">${name}</span>
+                        <span class="pill ${data.commission ? 'pill-warning' : 'pill-success'}">${data.commission ? `${data.commission}% Commission` : 'Direct'}</span>
+                    </div>
+                    <p class="mt-2 text-xs text-slate-400">Codes: ${(data.codes || []).join(', ') || '—'}</p>
+                    <p class="mt-1 text-xs text-slate-400">Remise par défaut: ${data.defaultDiscount?.percentage || 0}%</p>
+                </div>`;
+            }).join('') || '<p class="text-sm text-slate-400">Aucun partenaire configuré.</p>';
+        };
+
+        const populateRooms = (data) => {
+            const rooms = Object.keys(data.rooms || {});
+            const roomSelect = document.getElementById('simRoom');
+            const availabilityRooms = document.getElementById('availabilityRooms');
+            roomSelect.innerHTML = '';
+            availabilityRooms.innerHTML = '';
+            rooms.forEach((room) => {
+                roomSelect.appendChild(new Option(room, room));
+                const option = new Option(room, room);
+                availabilityRooms.appendChild(option);
+            });
+            if (rooms.length) {
+                roomSelect.value = rooms[0];
+                availabilityRooms.selectedIndex = 0;
+            }
+        };
+
+        const populatePlans = async () => {
+            const planSelect = document.getElementById('simPlan');
+            const roomId = document.getElementById('simRoom').value;
+            const partner = document.getElementById('simPartner').value;
+            planSelect.innerHTML = '<option value="">Chargement...</option>';
+            planSelect.disabled = true;
+
+            if (!state.hotelId || !roomId) {
+                planSelect.innerHTML = '<option value="">Sélectionnez une chambre</option>';
+                return;
+            }
+
+            try {
+                const params = new URLSearchParams({
+                    hotel_id: state.hotelId,
+                    partner_name: partner || '',
+                    room_type: roomId,
+                });
+                const response = await fetchJSON(`/plans/partner?${params.toString()}`);
+                const plans = response.plans || [];
+                planSelect.innerHTML = '';
+                plans.forEach((plan) => planSelect.appendChild(new Option(plan, plan)));
+                if (plans.length) {
+                    planSelect.value = plans[0];
+                    planSelect.disabled = false;
+                } else {
+                    planSelect.innerHTML = '<option value="">Aucun plan disponible</option>';
+                    planSelect.disabled = true;
+                }
+            } catch (error) {
+                const fallbackPlans = Object.keys(state.hotelData?.rooms?.[roomId]?.plans || {});
+                planSelect.innerHTML = '';
+                fallbackPlans.forEach((plan) => planSelect.appendChild(new Option(plan, plan)));
+                if (fallbackPlans.length) {
+                    planSelect.value = fallbackPlans[0];
+                    planSelect.disabled = false;
+                } else {
+                    planSelect.innerHTML = '<option value="">Aucun plan disponible</option>';
+                    planSelect.disabled = true;
+                }
+                showToast(`Impossible de charger les plans filtrés: ${error.message}`, 'error');
+            }
+        };
+
+        const loadHotelData = async () => {
+            const hotelId = document.getElementById('hotelSelect').value;
+            if (!hotelId) {
+                showToast('Sélectionnez un hôtel', 'warning');
+                return;
+            }
+            try {
+                document.getElementById('hotelStatus').textContent = 'Chargement des données et configurations...';
+                state.hotelData = await fetchJSON(`/data?hotel_id=${hotelId}`);
+                state.hotelConfig = await fetchJSON(`/config?hotel_id=${hotelId}`);
+                state.hotelId = hotelId;
+                populateRooms(state.hotelData);
+                populatePartners(state.hotelConfig);
+                await populatePlans();
+                document.getElementById('hotelStatus').textContent = `Hôtel ${hotelId} prêt. Sélectionnez vos paramètres.`;
+                document.getElementById('lastUpdate').textContent = new Date().toLocaleString('fr-FR');
+                document.getElementById('dataSummary').textContent = `${Object.keys(state.hotelData.rooms || {}).length} chambres configurées`;
+                showToast('Données hôtel chargées', 'success');
+            } catch (error) {
+                showToast(error.message, 'error');
+            }
+        };
+
+        const renderSimulation = (payload) => {
+            state.simulation = payload;
+            document.getElementById('simulationLoading').classList.add('hidden');
+            document.getElementById('simulationResults').classList.remove('hidden');
+            const summary = payload.summary || {};
+            document.getElementById('simNet').textContent = `${(summary.total_net || 0).toFixed(2)} €`;
+            document.getElementById('simDiscounts').textContent = `${(summary.total_discount || 0).toFixed(2)} €`;
+            const results = payload.results || [];
+            const table = document.getElementById('simulationTable');
+            table.innerHTML = results.map((row) => {
+                const partnerDiscount = ((row.gross_price || 0) - (row.price_after_partner_discount || 0)).toFixed(2);
+                const promoDiscount = ((row.price_after_partner_discount || 0) - (row.price_after_promo || 0)).toFixed(2);
+                const statusClass = row.stock > 0 ? 'pill-success' : 'pill-danger';
+                const statusLabel = row.stock > 0 ? `${row.stock} dispo` : 'Complet';
+                return `<tr>
+                    <td class="px-4 py-3">${row.date_display}</td>
+                    <td class="px-4 py-3 text-right">${(row.gross_price || 0).toFixed(2)} €</td>
+                    <td class="px-4 py-3 text-right">${partnerDiscount} €</td>
+                    <td class="px-4 py-3 text-right">${promoDiscount} €</td>
+                    <td class="px-4 py-3 text-right">${(row.commission || 0).toFixed(2)} €</td>
+                    <td class="px-4 py-3 text-right">${(row.net_price || 0).toFixed(2)} €</td>
+                    <td class="px-4 py-3 text-center"><span class="pill ${statusClass}">${statusLabel}</span></td>
+                </tr>`;
+            }).join('');
+            const soldNights = results.filter((row) => row.stock > 0).length;
+            document.getElementById('occupancyProgress').style.width = `${results.length ? (soldNights / results.length) * 100 : 0}%`;
+            document.getElementById('progressLabel').textContent = `${soldNights}/${results.length} nuits disponibles`;
+            document.getElementById('simulationMeta').innerHTML = `
+                <span class="pill ${payload.simulation_info?.partner ? 'pill-warning' : 'pill-success'}">
+                    ${payload.simulation_info?.partner || 'Direct'}
+                </span>
+                <span class="pill pill-warning">${payload.simulation_info?.plan}</span>
+                <span class="pill pill-success">${payload.simulation_info?.nights} nuits</span>`;
+        };
+
+        document.getElementById('simulationForm').addEventListener('submit', async (event) => {
+            event.preventDefault();
+            if (!state.hotelId) {
+                showToast('Chargez un hôtel avant de simuler.', 'warning');
+                return;
+            }
+            const payload = {
+                hotel_id: state.hotelId,
+                partner_name: document.getElementById('simPartner').value || null,
+                room: document.getElementById('simRoom').value,
+                plan: document.getElementById('simPlan').value,
+                start: document.getElementById('simStart').value,
+                end: document.getElementById('simEnd').value,
+                apply_commission: document.getElementById('applyCommission').checked,
+                apply_partner_discount: document.getElementById('applyDiscount').checked,
+                promo_discount: Number(document.getElementById('promoDiscount').value || 0),
+                performed_by: 'frontend-ui',
+            };
+            document.getElementById('simulationLoading').classList.remove('hidden');
+            document.getElementById('simulationResults').classList.add('hidden');
+            try {
+                const result = await fetchJSON('/simulate', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload),
+                });
+                renderSimulation(result);
+                showToast('Simulation complétée', 'success');
+            } catch (error) {
+                showToast(error.message, 'error');
+            } finally {
+                document.getElementById('simulationLoading').classList.add('hidden');
+            }
+        });
+
+        document.getElementById('simRoom').addEventListener('change', () => {
+            populatePlans().catch(() => {});
+        });
+
+        document.getElementById('simPartner').addEventListener('change', () => {
+            populatePlans().catch(() => {});
+        });
+
+        document.getElementById('availabilityForm').addEventListener('submit', async (event) => {
+            event.preventDefault();
+            if (!state.hotelId) {
+                showToast('Chargez un hôtel avant de consulter les disponibilités.', 'warning');
+                return;
+            }
+            const rooms = Array.from(document.getElementById('availabilityRooms').selectedOptions).map((option) => option.value);
+            const payload = {
+                hotel_id: state.hotelId,
+                start_date: document.getElementById('availabilityStart').value,
+                end_date: document.getElementById('availabilityEnd').value,
+                room_types: rooms,
+                performed_by: 'frontend-ui',
+            };
+            try {
+                const result = await fetchJSON('/availability', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload),
+                });
+                const headerRow = document.getElementById('availabilityHeader');
+                const body = document.getElementById('availabilityBody');
+                headerRow.innerHTML = '<th class="px-4 py-3 text-left">Chambre</th>' + result.period.dates.map((date) => `<th class="px-4 py-3 text-center">${result.period.date_display[date]}</th>`).join('');
+                body.innerHTML = Object.entries(result.availability).map(([room, dates]) => {
+                    const cells = result.period.dates.map((date) => {
+                        const value = dates[date];
+                        const cls = value === 0 ? 'pill-danger' : value < 3 ? 'pill-warning' : 'pill-success';
+                        return `<td class="px-4 py-3 text-center"><span class="pill ${cls}">${value}</span></td>`;
+                    }).join('');
+                    return `<tr><td class="px-4 py-3 font-medium text-white">${room}</td>${cells}</tr>`;
+                }).join('');
+                document.getElementById('availabilityResults').classList.remove('hidden');
+                document.getElementById('availabilityLegend').textContent = 'Vert: stock confortable • Orange: stock faible (<3) • Rouge: complet';
+                showToast('Disponibilités mises à jour', 'success');
+            } catch (error) {
+                showToast(error.message, 'error');
+            }
+        });
+
+        document.getElementById('resetAvailability').addEventListener('click', () => {
+            document.getElementById('availabilityStart').value = '';
+            document.getElementById('availabilityEnd').value = '';
+            document.getElementById('availabilityResults').classList.add('hidden');
+        });
+
+        document.getElementById('exportExcel').addEventListener('click', async () => {
+            if (!state.simulation) {
+                showToast('Réalisez une simulation avant d\'exporter.', 'warning');
+                return;
+            }
+            try {
+                const response = await fetch(`${getApi()}/export/simulation`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(state.simulation),
+                });
+                if (!response.ok) throw new Error('Export impossible');
+                const blob = await response.blob();
+                const url = window.URL.createObjectURL(blob);
+                const link = document.createElement('a');
+                link.href = url;
+                link.download = `simulation_${state.hotelId}_${Date.now()}.xlsx`;
+                link.click();
+                showToast('Export Excel téléchargé', 'success');
+            } catch (error) {
+                showToast(error.message, 'error');
+            }
+        });
+
+        document.getElementById('saveEndpoint').addEventListener('click', () => {
+            const value = apiInput.value.trim();
+            if (!value) {
+                showToast('Indiquez un endpoint valide', 'warning');
+                return;
+            }
+            localStorage.setItem(API_KEY, value);
+            showToast('Endpoint sauvegardé. Chargement des hôtels...', 'info');
+            loadHotels();
+        });
+
+        document.getElementById('loadHotel').addEventListener('click', loadHotelData);
+
+        document.querySelectorAll('.tab-button').forEach((button) => {
+            button.addEventListener('click', () => {
+                document.querySelectorAll('.tab-button').forEach((btn) => btn.classList.remove('active'));
+                document.querySelectorAll('.tab-section').forEach((section) => section.classList.add('hidden'));
+                button.classList.add('active');
+                document.getElementById(button.dataset.target).classList.remove('hidden');
+            });
+        });
+
+        loadHotels();
+        feather.replace();
+    </script>
+</body>
+</html>

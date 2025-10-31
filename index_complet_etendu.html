@@ -1,0 +1,1080 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>HotelManager Pro V2 – Expérience Client</title>
+    <link rel="icon" type="image/svg+xml" href="https://cdn.jsdelivr.net/npm/lucide-static@0.263.1/icons/sparkles.svg">
+    <link rel="stylesheet" href="style.css" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/feather-icons"></script>
+    <script src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vanta@0.5.24/dist/vanta.net.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        body { font-family: 'Inter', sans-serif; }
+        #vanta-bg { position: fixed; inset: 0; z-index: -2; }
+        .glass-panel { backdrop-filter: blur(18px); background: rgba(15, 23, 42, 0.68); border: 1px solid rgba(148, 163, 184, 0.25); border-radius: 1.5rem; box-shadow: 0 30px 60px -30px rgba(15, 23, 42, 0.85); }
+        .tab-button { position: relative; padding: 0.9rem 1.6rem; border-radius: 999px; background: transparent; color: rgba(226, 232, 240, 0.65); transition: all 0.3s ease; }
+        .tab-button.active { color: #f8fafc; background: rgba(79, 70, 229, 0.25); box-shadow: 0 10px 30px -15px rgba(79, 70, 229, 0.5); }
+        .form-control { width: 100%; border-radius: 1rem; padding: 0.85rem 1rem; border: 1px solid rgba(148, 163, 184, 0.25); background: rgba(15, 23, 42, 0.45); color: #e2e8f0; transition: all 0.3s ease; }
+        .form-control:focus { border-color: rgba(129, 140, 248, 0.65); box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15); outline: none; }
+        .btn-primary { display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem; padding: 0.85rem 1.4rem; border-radius: 1rem; background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%); color: white; font-weight: 600; transition: all 0.3s ease; }
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 18px 35px -20px rgba(99, 102, 241, 0.85); }
+        .btn-secondary { display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem; padding: 0.75rem 1.2rem; border-radius: 1rem; border: 1px solid rgba(148, 163, 184, 0.35); color: #cbd5f5; transition: all 0.3s ease; }
+        .btn-secondary:hover { background: rgba(148, 163, 184, 0.15); }
+        .btn-danger { display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem; padding: 0.75rem 1.2rem; border-radius: 1rem; border: 1px solid rgba(248, 113, 113, 0.35); color: #fca5a5; transition: all 0.3s ease; }
+        .btn-danger:hover { background: rgba(248, 113, 113, 0.15); }
+        .badge { display: inline-flex; align-items: center; gap: 0.35rem; padding: 0.3rem 0.75rem; border-radius: 999px; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.2em; }
+        .badge-success { background: rgba(16, 185, 129, 0.15); color: #bbf7d0; border: 1px solid rgba(16, 185, 129, 0.3); }
+        .badge-warning { background: rgba(245, 158, 11, 0.15); color: #fcd34d; border: 1px solid rgba(245, 158, 11, 0.3); }
+        .badge-info { background: rgba(56, 189, 248, 0.15); color: #bae6fd; border: 1px solid rgba(56, 189, 248, 0.3); }
+        .badge-danger { background: rgba(248, 113, 113, 0.15); color: #fca5a5; border: 1px solid rgba(248, 113, 113, 0.3); }
+        .toast { position: fixed; top: 2rem; right: 2rem; width: 320px; border-radius: 1rem; padding: 0.85rem 1rem; font-size: 0.875rem; display: flex; gap: 0.65rem; align-items: flex-start; border: 1px solid rgba(255, 255, 255, 0.1); backdrop-filter: blur(14px); box-shadow: 0 25px 35px -25px rgba(15, 23, 42, 0.85); opacity: 0; transform: translateY(-10px); transition: all 0.35s ease; }
+        .toast.show { opacity: 1; transform: translateY(0); }
+        .progress-bar { height: 6px; border-radius: 999px; background: rgba(148, 163, 184, 0.2); overflow: hidden; }
+        .progress-bar span { display: block; height: 100%; border-radius: inherit; background: linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%); transition: width 0.3s ease; }
+        .table-sticky thead th { position: sticky; top: 0; z-index: 5; background: rgba(15, 23, 42, 0.8); backdrop-filter: blur(12px); }
+        .pill { border-radius: 999px; padding: 0.35rem 0.75rem; font-size: 0.7rem; letter-spacing: 0.1em; text-transform: uppercase; }
+        .pill-success { background: rgba(34, 197, 94, 0.18); color: #86efac; }
+        .pill-danger { background: rgba(248, 113, 113, 0.18); color: #fca5a5; }
+        .pill-warning { background: rgba(251, 191, 36, 0.18); color: #fcd34d; }
+        .loading-spinner { border: 2px solid rgba(148, 163, 184, 0.2); border-radius: 50%; border-top: 2px solid #6366f1; width: 20px; height: 20px; animation: spin 1s linear infinite; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        .chart-container { position: relative; height: 400px; }
+        .drag-drop-zone { border: 2px dashed rgba(148, 163, 184, 0.3); border-radius: 1rem; padding: 2rem; text-align: center; transition: all 0.3s ease; }
+        .drag-drop-zone.drag-over { border-color: #6366f1; background: rgba(99, 102, 241, 0.1); }
+        .file-item { transition: all 0.3s ease; }
+        .file-item:hover { transform: translateY(-2px); box-shadow: 0 10px 25px -10px rgba(0, 0, 0, 0.3); }
+        .setting-group { border-left: 3px solid #6366f1; padding-left: 1rem; margin-left: 0.5rem; }
+    </style>
+</head>
+<body class="min-h-screen text-slate-100">
+    <div id="vanta-bg"></div>
+
+    <header class="px-6 py-12 sm:px-10">
+        <div class="mx-auto flex max-w-6xl flex-col gap-8 lg:flex-row lg:items-center lg:justify-between">
+            <div class="space-y-4">
+                <div class="inline-flex items-center gap-3 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-xs uppercase tracking-[0.45em] text-slate-300">
+                    <i data-feather="sparkles" class="h-4 w-4"></i>
+                    HotelManager Pro V2
+                </div>
+                <h1 class="text-4xl font-semibold leading-tight md:text-5xl">
+                    Gestion tarifaire immersive & simulation temps réel
+                </h1>
+                <p class="max-w-2xl text-base text-slate-300">
+                    Visualisez, simulez et exportez vos stratégies tarifaires en profitant d'une expérience nouvelle génération : effets glassmorphism, feedbacks instantanés et intégration totale avec le backend FastAPI.
+                </p>
+                <div class="flex flex-wrap items-center gap-3 text-xs">
+                    <span class="badge badge-success">Temps réel</span>
+                    <span class="badge badge-info">Glassmorphism</span>
+                    <span class="badge badge-warning">Monitoring intégré</span>
+                </div>
+            </div>
+            <div class="glass-panel max-w-sm p-6 text-sm text-slate-300">
+                <h2 class="text-lg font-semibold text-white">Connexion API sécurisée</h2>
+                <p class="mt-2 text-xs text-slate-400">Définissez votre endpoint backend pour synchroniser les données.</p>
+                <div class="mt-4 space-y-3">
+                    <label class="text-xs uppercase tracking-[0.25em] text-slate-400">Endpoint FastAPI</label>
+                    <input id="apiBase" type="url" class="form-control" placeholder="https://api.hotelmanager.fr" />
+                    <button id="saveEndpoint" class="btn-secondary w-full justify-center">Sauvegarder & synchroniser</button>
+                </div>
+                <p id="connectionStatus" class="mt-4 flex items-center gap-2 text-xs text-slate-400">
+                    <span class="inline-flex h-2 w-2 rounded-full bg-amber-400"></span>
+                    En attente de synchronisation
+                </p>
+            </div>
+        </div>
+    </header>
+
+    <main class="px-6 pb-24 sm:px-10">
+        <div class="mx-auto flex max-w-6xl flex-col gap-6">
+            <section class="glass-panel p-6 sm:p-10">
+                <div class="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
+                    <div class="flex-1 space-y-4">
+                        <label class="text-xs uppercase tracking-[0.25em] text-slate-400">Sélection de l'hôtel</label>
+                        <div class="flex flex-col gap-3 sm:flex-row">
+                            <select id="hotelSelect" class="form-control sm:max-w-xs" aria-label="Sélectionnez un hôtel"></select>
+                            <button id="loadHotel" class="btn-primary">
+                                <i data-feather="refresh-ccw" class="h-4 w-4"></i>
+                                Charger les données
+                            </button>
+                            <button id="exportExcel" class="btn-secondary">
+                                <i data-feather="download" class="h-4 w-4"></i>
+                                Export Excel
+                            </button>
+                        </div>
+                        <p id="hotelStatus" class="text-sm text-slate-400">
+                            Choisissez un hôtel pour activer les modules de simulation et disponibilités.
+                        </p>
+                    </div>
+                    <div class="flex items-center gap-4 text-sm text-slate-300">
+                        <span class="pill pill-success">API active</span>
+                        <span class="pill pill-warning">Multi-hôtel</span>
+                        <span class="pill pill-success">Temps réel</span>
+                    </div>
+                </div>
+
+                <div class="mt-8 flex flex-wrap gap-3">
+                    <button class="tab-button active" data-target="tabSimulator">
+                        <i data-feather="sliders" class="h-4 w-4"></i>
+                        Simulation tarifaire
+                    </button>
+                    <button class="tab-button" data-target="tabAvailability">
+                        <i data-feather="calendar" class="h-4 w-4"></i>
+                        Gestion des disponibilités
+                    </button>
+                    <button class="tab-button" data-target="tabPriceTracking">
+                        <i data-feather="trending-up" class="h-4 w-4"></i>
+                        Suivi des tarifs
+                    </button>
+                    <button class="tab-button" data-target="tabFileManagement">
+                        <i data-feather="database" class="h-4 w-4"></i>
+                        Gestion des fichiers
+                    </button>
+                    <button class="tab-button" data-target="tabSettings">
+                        <i data-feather="settings" class="h-4 w-4"></i>
+                        Paramètres
+                    </button>
+                    <button class="tab-button" data-target="tabAnalytics">
+                        <i data-feather="bar-chart-2" class="h-4 w-4"></i>
+                        Insights & partenaires
+                    </button>
+                </div>
+
+                <div class="mt-8 space-y-10">
+                    <!-- Onglet Simulation tarifaire -->
+                    <section id="tabSimulator" class="tab-section space-y-6">
+                        <div class="grid gap-6 lg:grid-cols-3">
+                            <div class="glass-panel p-6">
+                                <h3 class="text-lg font-semibold">Paramètres</h3>
+                                <p class="mt-2 text-xs text-slate-400">Configurez la simulation multi-partenaire en temps réel.</p>
+                                <form id="simulationForm" class="mt-4 space-y-4">
+                                    <div>
+                                        <label class="text-xs uppercase tracking-[0.25em] text-slate-400">Partenaire</label>
+                                        <select id="simPartner" class="form-control"></select>
+                                    </div>
+                                    <div>
+                                        <label class="text-xs uppercase tracking-[0.25em] text-slate-400">Type de chambre</label>
+                                        <select id="simRoom" class="form-control"></select>
+                                    </div>
+                                    <div>
+                                        <label class="text-xs uppercase tracking-[0.25em] text-slate-400">Plan tarifaire</label>
+                                        <select id="simPlan" class="form-control"></select>
+                                    </div>
+                                    <div class="grid gap-3 sm:grid-cols-2">
+                                        <div>
+                                            <label class="text-xs uppercase tracking-[0.25em] text-slate-400">Arrivée</label>
+                                            <input id="simStart" type="date" class="form-control" />
+                                        </div>
+                                        <div>
+                                            <label class="text-xs uppercase tracking-[0.25em] text-slate-400">Départ</label>
+                                            <input id="simEnd" type="date" class="form-control" />
+                                        </div>
+                                    </div>
+                                    <div class="grid gap-3 sm:grid-cols-2">
+                                        <label class="inline-flex items-center gap-3 text-sm text-slate-300">
+                                            <input id="applyCommission" type="checkbox" class="h-4 w-4 rounded border-slate-500 bg-transparent text-indigo-500 focus:ring-indigo-400" checked />
+                                            Appliquer commission partenaire</input>
+                                        </label>
+                                    </div>
+                                    <button id="runSimulation" type="submit" class="btn-primary w-full justify-center">
+                                        <i data-feather="play" class="h-4 w-4"></i>
+                                        Lancer la simulation
+                                    </button>
+                                </form>
+                            </div>
+                            <div class="glass-panel p-6 lg:col-span-2">
+                                <h3 class="text-lg font-semibold">Résultats de simulation</h3>
+                                <div id="simulationResults" class="mt-4 space-y-4">
+                                    <div class="text-center text-slate-400 py-8">
+                                        Configurez les paramètres et lancez la simulation pour voir les résultats.
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- Onglet Gestion des disponibilités -->
+                    <section id="tabAvailability" class="tab-section hidden space-y-6">
+                        <div class="glass-panel p-6">
+                            <h3 class="text-lg font-semibold">Calendrier des disponibilités</h3>
+                            <p class="mt-2 text-xs text-slate-400">Visualisez et gérez les disponibilités par type de chambre.</p>
+                            <div id="availabilityCalendar" class="mt-4">
+                                <div class="text-center text-slate-400 py-8">
+                                    Sélectionnez un hôtel et lancez le chargement des disponibilités.
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- Onglet Suivi des tarifs -->
+                    <section id="tabPriceTracking" class="tab-section hidden space-y-6">
+                        <div class="grid gap-6 lg:grid-cols-4">
+                            <div class="glass-panel p-6">
+                                <h3 class="text-lg font-semibold">Paramètres de recherche</h3>
+                                <p class="mt-2 text-xs text-slate-400">Configurez les critères pour le suivi tarifaire.</p>
+                                <form id="priceTrackingForm" class="mt-4 space-y-4">
+                                    <div class="grid gap-3 sm:grid-cols-2">
+                                        <div>
+                                            <label class="text-xs uppercase tracking-[0.25em] text-slate-400">Date début</label>
+                                            <input id="trackStart" type="date" class="form-control" />
+                                        </div>
+                                        <div>
+                                            <label class="text-xs uppercase tracking-[0.25em] text-slate-400">Date fin</label>
+                                            <input id="trackEnd" type="date" class="form-control" />
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <label class="text-xs uppercase tracking-[0.25em] text-slate-400">Type de chambre</label>
+                                        <select id="trackRoom" class="form-control">
+                                            <option value="Double Classique">Double Classique</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label class="text-xs uppercase tracking-[0.25em] text-slate-400">Plan tarifaire</label>
+                                        <select id="trackPlan" class="form-control">
+                                            <option value="OTA RO FLEX">OTA RO FLEX</option>
+                                        </select>
+                                    </div>
+                                    <button id="searchPrices" type="submit" class="btn-primary w-full justify-center">
+                                        <i data-feather="search" class="h-4 w-4"></i>
+                                        Lancer la recherche
+                                    </button>
+                                </form>
+                            </div>
+                            <div class="glass-panel p-6 lg:col-span-3">
+                                <div class="flex items-center justify-between mb-4">
+                                    <h3 class="text-lg font-semibold">Résultats du suivi tarifaire</h3>
+                                    <div id="priceLoading" class="hidden flex items-center gap-2 text-slate-400">
+                                        <div class="loading-spinner"></div>
+                                        <span>Chargement des données...</span>
+                                    </div>
+                                </div>
+                                
+                                <!-- Tableau des tarifs -->
+                                <div id="priceTable" class="overflow-hidden">
+                                    <div class="text-center text-slate-400 py-8">
+                                        Configurez les paramètres et lancez la recherche pour voir les tarifs.
+                                    </div>
+                                </div>
+
+                                <!-- Graphique d'évolution -->
+                                <div class="mt-6">
+                                    <h4 class="text-md font-semibold mb-3">Évolution tarifaire</h4>
+                                    <div class="chart-container">
+                                        <canvas id="priceChart"></canvas>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- Nouvel onglet : Gestion des fichiers -->
+                    <section id="tabFileManagement" class="tab-section hidden space-y-6">
+                        <div class="grid gap-6 lg:grid-cols-2">
+                            <!-- Zone d'upload -->
+                            <div class="glass-panel p-6">
+                                <h3 class="text-lg font-semibold">Upload de fichiers Excel</h3>
+                                <p class="mt-2 text-xs text-slate-400">Sauvegardez vos fichiers Excel de tarifs pour les simulations.</p>
+                                
+                                <!-- Zone de drag & drop -->
+                                <div id="uploadZone" class="drag-drop-zone mt-4">
+                                    <i data-feather="upload-cloud" class="h-12 w-12 text-slate-400 mx-auto mb-4"></i>
+                                    <p class="text-lg font-medium text-slate-300">Glissez-déposez vos fichiers Excel ici</p>
+                                    <p class="text-sm text-slate-400 mt-2">ou cliquez pour sélectionner</p>
+                                    <input id="excelFileInput" type="file" accept=".xlsx,.xls,.xlsm" multiple class="hidden" />
+                                    <button id="selectFiles" class="btn-secondary mt-4">
+                                        <i data-feather="file-plus" class="h-4 w-4"></i>
+                                        Sélectionner des fichiers
+                                    </button>
+                                </div>
+                                
+                                <!-- Progress bar -->
+                                <div id="uploadProgress" class="mt-4 hidden">
+                                    <div class="flex items-center justify-between text-sm mb-2">
+                                        <span>Upload en cours...</span>
+                                        <span id="progressText">0%</span>
+                                    </div>
+                                    <div class="progress-bar">
+                                        <span id="progressBar" style="width: 0%"></span>
+                                    </div>
+                                </div>
+                                
+                                <!-- Statistiques -->
+                                <div id="fileStats" class="mt-6 p-4 bg-slate-800/50 rounded-lg">
+                                    <h4 class="text-sm font-semibold mb-3">Statistiques des fichiers</h4>
+                                    <div id="statsContent" class="space-y-2 text-sm">
+                                        <div class="text-center text-slate-400">Sélectionnez un hôtel pour voir les statistiques</div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Historique des fichiers -->
+                            <div class="glass-panel p-6">
+                                <div class="flex items-center justify-between mb-4">
+                                    <h3 class="text-lg font-semibold">Historique des fichiers</h3>
+                                    <button id="refreshHistory" class="btn-secondary">
+                                        <i data-feather="refresh-ccw" class="h-4 w-4"></i>
+                                        Actualiser
+                                    </button>
+                                </div>
+                                
+                                <div id="fileHistory" class="space-y-3 max-h-96 overflow-y-auto">
+                                    <div class="text-center text-slate-400 py-8">
+                                        Aucun fichier trouvé. Uploadez votre premier fichier Excel.
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- Nouvel onglet : Paramètres -->
+                    <section id="tabSettings" class="tab-section hidden space-y-6">
+                        <div class="grid gap-6 lg:grid-cols-2">
+                            <!-- Configuration PostgreSQL -->
+                            <div class="glass-panel p-6 setting-group">
+                                <h3 class="text-lg font-semibold">Configuration Base de Données</h3>
+                                <p class="mt-2 text-xs text-slate-400">Configurez la connexion à votre base PostgreSQL.</p>
+                                
+                                <form id="databaseSettingsForm" class="mt-4 space-y-4">
+                                    <div>
+                                        <label class="text-xs uppercase tracking-[0.25em] text-slate-400">URL PostgreSQL</label>
+                                        <input id="databaseUrl" type="text" class="form-control" 
+                                               placeholder="postgresql://user:password@localhost:5432/database" />
+                                        <p class="text-xs text-slate-400 mt-1">Format: postgresql://user:password@host:port/database</p>
+                                    </div>
+                                    
+                                    <div class="grid gap-3 sm:grid-cols-2">
+                                        <div>
+                                            <label class="text-xs uppercase tracking-[0.25em] text-slate-400">Host</label>
+                                            <input id="dbHost" type="text" class="form-control" placeholder="localhost" />
+                                        </div>
+                                        <div>
+                                            <label class="text-xs uppercase tracking-[0.25em] text-slate-400">Port</label>
+                                            <input id="dbPort" type="number" class="form-control" placeholder="5432" />
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="grid gap-3 sm:grid-cols-2">
+                                        <div>
+                                            <label class="text-xs uppercase tracking-[0.25em] text-slate-400">Utilisateur</label>
+                                            <input id="dbUser" type="text" class="form-control" placeholder="postgres" />
+                                        </div>
+                                        <div>
+                                            <label class="text-xs uppercase tracking-[0.25em] text-slate-400">Mot de passe</label>
+                                            <input id="dbPassword" type="password" class="form-control" placeholder="••••••••" />
+                                        </div>
+                                    </div>
+                                    
+                                    <div>
+                                        <label class="text-xs uppercase tracking-[0.25em] text-slate-400">Nom de la base</label>
+                                        <input id="dbName" type="text" class="form-control" placeholder="hotelmanager" />
+                                    </div>
+                                    
+                                    <button id="testConnection" type="button" class="btn-secondary">
+                                        <i data-feather="activity" class="h-4 w-4"></i>
+                                        Tester la connexion
+                                    </button>
+                                    
+                                    <button id="saveDatabaseSettings" type="submit" class="btn-primary">
+                                        <i data-feather="save" class="h-4 w-4"></i>
+                                        Sauvegarder la configuration
+                                    </button>
+                                </form>
+                            </div>
+                            
+                            <!-- Configuration fichiers -->
+                            <div class="glass-panel p-6 setting-group">
+                                <h3 class="text-lg font-semibold">Configuration Fichiers</h3>
+                                <p class="mt-2 text-xs text-slate-400">Paramètres pour la gestion des fichiers Excel.</p>
+                                
+                                <form id="fileSettingsForm" class="mt-4 space-y-4">
+                                    <div>
+                                        <label class="text-xs uppercase tracking-[0.25em] text-slate-400">Chemin de stockage</label>
+                                        <input id="storagePath" type="text" class="form-control" 
+                                               placeholder="/path/to/excel/storage" />
+                                        <p class="text-xs text-slate-400 mt-1">Répertoire où stocker les fichiers Excel</p>
+                                    </div>
+                                    
+                                    <div>
+                                        <label class="text-xs uppercase tracking-[0.25em] text-slate-400">Nombre max de fichiers par hôtel</label>
+                                        <input id="maxFiles" type="number" class="form-control" value="10" min="1" max="50" />
+                                        <p class="text-xs text-slate-400 mt-1">Les anciens fichiers seront automatiquement supprimés</p>
+                                    </div>
+                                    
+                                    <div class="flex items-center gap-3">
+                                        <input id="autoCleanup" type="checkbox" class="h-4 w-4 rounded border-slate-500 bg-transparent text-indigo-500 focus:ring-indigo-400" checked />
+                                        <label class="text-sm text-slate-300">Nettoyage automatique activé</label>
+                                    </div>
+                                    
+                                    <button id="saveFileSettings" type="submit" class="btn-primary">
+                                        <i data-feather="save" class="h-4 w-4"></i>
+                                        Sauvegarder la configuration
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                        
+                        <!-- État des paramètres -->
+                        <div class="glass-panel p-6">
+                            <h3 class="text-lg font-semibold mb-4">État des Paramètres</h3>
+                            <div id="settingsStatus" class="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                                <div class="p-4 bg-slate-800/50 rounded-lg">
+                                    <div class="flex items-center gap-3 mb-2">
+                                        <i data-feather="database" class="h-5 w-5 text-blue-400"></i>
+                                        <span class="font-medium">Base de données</span>
+                                    </div>
+                                    <div id="dbStatus" class="text-sm">
+                                        <div class="text-slate-400">Statut: <span class="text-amber-400">Non configuré</span></div>
+                                    </div>
+                                </div>
+                                
+                                <div class="p-4 bg-slate-800/50 rounded-lg">
+                                    <div class="flex items-center gap-3 mb-2">
+                                        <i data-feather="hard-drive" class="h-5 w-5 text-green-400"></i>
+                                        <span class="font-medium">Stockage</span>
+                                    </div>
+                                    <div id="storageStatus" class="text-sm">
+                                        <div class="text-slate-400">Chemin: <span class="text-slate-300">/tmp/hotel_excel_storage</span></div>
+                                        <div class="text-slate-400">Max fichiers: <span class="text-slate-300">10</span></div>
+                                    </div>
+                                </div>
+                                
+                                <div class="p-4 bg-slate-800/50 rounded-lg">
+                                    <div class="flex items-center gap-3 mb-2">
+                                        <i data-feather="shield" class="h-5 w-5 text-purple-400"></i>
+                                        <span class="font-medium">Sécurité</span>
+                                    </div>
+                                    <div id="securityStatus" class="text-sm">
+                                        <div class="text-slate-400">Nettoyage auto: <span class="text-green-400">Actif</span></div>
+                                        <div class="text-slate-400">Historique: <span class="text-slate-300">10 fichiers</span></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- Onglet Analytics -->
+                    <section id="tabAnalytics" class="tab-section hidden space-y-6">
+                        <div class="glass-panel p-6">
+                            <h3 class="text-lg font-semibold">Insights & partenaires</h3>
+                            <div id="analyticsContent" class="mt-4 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                                <div class="text-center text-slate-400 py-8">
+                                    Analytics en développement.
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <!-- Toast notifications -->
+    <div id="toast" class="toast hidden">
+        <i data-feather="check-circle" class="h-5 w-5 text-green-400 mt-0.5"></i>
+        <div class="flex-1">
+            <p id="toastMessage" class="font-medium"></p>
+            <p id="toastDescription" class="text-xs text-slate-400 mt-1"></p>
+        </div>
+        <button id="closeToast" class="text-slate-400 hover:text-white">
+            <i data-feather="x" class="h-4 w-4"></i>
+        </button>
+    </div>
+
+    <script>
+        // Configuration globale
+        const API_BASE = 'http://localhost:8080';
+        
+        // Gestion des onglets
+        document.querySelectorAll('.tab-button').forEach(button => {
+            button.addEventListener('click', () => {
+                const target = button.dataset.target;
+                
+                // Désactiver tous les onglets
+                document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
+                document.querySelectorAll('.tab-section').forEach(section => section.classList.add('hidden'));
+                
+                // Activer l'onglet sélectionné
+                button.classList.add('active');
+                document.getElementById(target).classList.remove('hidden');
+                
+                // Actions spécifiques selon l'onglet
+                if (target === 'tabSettings') {
+                    loadSettings();
+                } else if (target === 'tabFileManagement') {
+                    loadFileHistory();
+                }
+            });
+        });
+
+        // Gestion des endpoints API
+        document.getElementById('saveEndpoint').addEventListener('click', () => {
+            const apiBase = document.getElementById('apiBase').value;
+            if (apiBase) {
+                localStorage.setItem('apiBase', apiBase);
+                document.getElementById('connectionStatus').innerHTML = '<span class="inline-flex h-2 w-2 rounded-full bg-green-400"></span> Endpoint configuré';
+                showToast('Configuration sauvegardée', 'Endpoint API configuré avec succès');
+            }
+        });
+
+        // Charger l'endpoint sauvegardé
+        const savedApiBase = localStorage.getItem('apiBase');
+        if (savedApiBase) {
+            document.getElementById('apiBase').value = savedApiBase;
+        }
+
+        // Fonction pour afficher les toasts
+        function showToast(message, description = '') {
+            const toast = document.getElementById('toast');
+            const toastMessage = document.getElementById('toastMessage');
+            const toastDescription = document.getElementById('toastDescription');
+            
+            toastMessage.textContent = message;
+            toastDescription.textContent = description;
+            toast.classList.remove('hidden');
+            toast.classList.add('show');
+            
+            setTimeout(() => {
+                toast.classList.remove('show');
+                setTimeout(() => toast.classList.add('hidden'), 350);
+            }, 4000);
+        }
+
+        // ===============================
+        // GESTION DES FICHIERS EXCEL
+        // ===============================
+
+        // Sélection de fichiers
+        document.getElementById('selectFiles').addEventListener('click', () => {
+            document.getElementById('excelFileInput').click();
+        });
+
+        document.getElementById('excelFileInput').addEventListener('change', (e) => {
+            if (e.target.files.length > 0) {
+                uploadFiles(e.target.files);
+            }
+        });
+
+        // Drag & Drop
+        const uploadZone = document.getElementById('uploadZone');
+
+        uploadZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadZone.classList.add('drag-over');
+        });
+
+        uploadZone.addEventListener('dragleave', (e) => {
+            e.preventDefault();
+            uploadZone.classList.remove('drag-over');
+        });
+
+        uploadZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadZone.classList.remove('drag-over');
+            
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                uploadFiles(files);
+            }
+        });
+
+        // Upload des fichiers
+        async function uploadFiles(files) {
+            const hotelId = document.getElementById('hotelSelect').value;
+            
+            if (!hotelId) {
+                showToast('Erreur', 'Veuillez d\'abord sélectionner un hôtel');
+                return;
+            }
+
+            const progressContainer = document.getElementById('uploadProgress');
+            const progressBar = document.getElementById('progressBar');
+            const progressText = document.getElementById('progressText');
+
+            progressContainer.classList.remove('hidden');
+            
+            for (let i = 0; i < files.length; i++) {
+                const file = files[i];
+                const progress = ((i + 1) / files.length) * 100;
+                
+                progressBar.style.width = progress + '%';
+                progressText.textContent = Math.round(progress) + '%';
+                
+                try {
+                    await uploadSingleFile(file, hotelId);
+                } catch (error) {
+                    console.error('Erreur upload:', error);
+                    showToast('Erreur', `Impossible d'uploader ${file.name}`);
+                }
+                
+                // Mettre à jour l'historique après chaque upload
+                setTimeout(() => {
+                    loadFileHistory();
+                    loadFileStats();
+                }, 500);
+            }
+            
+            setTimeout(() => {
+                progressContainer.classList.add('hidden');
+                progressBar.style.width = '0%';
+                progressText.textContent = '0%';
+                showToast('Upload terminé', `${files.length} fichier(s) uploadé(s)`);
+            }, 1000);
+        }
+
+        async function uploadSingleFile(file, hotelId) {
+            const formData = new FormData();
+            formData.append('file', file);
+            
+            const response = await fetch(`${API_BASE}/excel-management/upload/${hotelId}`, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'uploaded_by': 'user'
+                }
+            });
+            
+            if (!response.ok) {
+                const error = await response.json();
+                throw new Error(error.detail || 'Erreur lors de l\'upload');
+            }
+            
+            return response.json();
+        }
+
+        // Charger l'historique des fichiers
+        async function loadFileHistory() {
+            const hotelId = document.getElementById('hotelSelect').value;
+            const historyContainer = document.getElementById('fileHistory');
+            
+            if (!hotelId) {
+                historyContainer.innerHTML = '<div class="text-center text-slate-400 py-8">Sélectionnez un hôtel pour voir l\'historique</div>';
+                return;
+            }
+            
+            try {
+                const response = await fetch(`${API_BASE}/excel-management/history/${hotelId}`);
+                
+                if (!response.ok) {
+                    throw new Error('Erreur lors du chargement de l\'historique');
+                }
+                
+                const data = await response.json();
+                
+                if (data.success && data.files.length > 0) {
+                    displayFileHistory(data.files);
+                } else {
+                    historyContainer.innerHTML = '<div class="text-center text-slate-400 py-8">Aucun fichier trouvé. Uploadez votre premier fichier Excel.</div>';
+                }
+                
+            } catch (error) {
+                console.error('Erreur chargement historique:', error);
+                historyContainer.innerHTML = '<div class="text-center text-red-400 py-8">Erreur lors du chargement de l\'historique</div>';
+            }
+        }
+
+        // Afficher l'historique des fichiers
+        function displayFileHistory(files) {
+            const historyContainer = document.getElementById('fileHistory');
+            
+            let html = '';
+            files.forEach(file => {
+                const uploadDate = new Date(file.uploaded_at).toLocaleDateString('fr-FR');
+                const sizeMB = (file.file_size / (1024 * 1024)).toFixed(2);
+                
+                html += `
+                    <div class="file-item p-4 bg-slate-800/50 rounded-lg border border-slate-600">
+                        <div class="flex items-center justify-between">
+                            <div class="flex-1">
+                                <h4 class="font-medium text-slate-200">${file.original_filename}</h4>
+                                <div class="flex items-center gap-4 mt-2 text-sm text-slate-400">
+                                    <span><i data-feather="calendar" class="h-3 w-3 inline mr-1"></i>${uploadDate}</span>
+                                    <span><i data-feather="hard-drive" class="h-3 w-3 inline mr-1"></i>${sizeMB} MB</span>
+                                    <span class="pill ${file.status === 'processed' ? 'pill-success' : 'pill-warning'}">${file.status}</span>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <button onclick="downloadFile(${file.id}, '${file.original_filename}')" class="btn-secondary">
+                                    <i data-feather="download" class="h-4 w-4"></i>
+                                </button>
+                                <button onclick="deleteFile(${file.id})" class="btn-danger">
+                                    <i data-feather="trash-2" class="h-4 w-4"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            historyContainer.innerHTML = html;
+            
+            // Re-initialiser les icônes
+            feather.replace();
+        }
+
+        // Charger les statistiques des fichiers
+        async function loadFileStats() {
+            const hotelId = document.getElementById('hotelSelect').value;
+            const statsContainer = document.getElementById('statsContent');
+            
+            if (!hotelId) {
+                statsContainer.innerHTML = '<div class="text-center text-slate-400">Sélectionnez un hôtel pour voir les statistiques</div>';
+                return;
+            }
+            
+            try {
+                const response = await fetch(`${API_BASE}/excel-management/stats/${hotelId}`);
+                
+                if (!response.ok) {
+                    throw new Error('Erreur lors du chargement des statistiques');
+                }
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    const stats = data.stats;
+                    statsContainer.innerHTML = `
+                        <div class="grid grid-cols-2 gap-3">
+                            <div class="text-center">
+                                <div class="text-lg font-semibold text-green-400">${stats.total_files}</div>
+                                <div class="text-xs text-slate-400">Fichiers total</div>
+                            </div>
+                            <div class="text-center">
+                                <div class="text-lg font-semibold text-blue-400">${stats.total_size_mb} MB</div>
+                                <div class="text-xs text-slate-400">Espace utilisé</div>
+                            </div>
+                            <div class="text-center">
+                                <div class="text-lg font-semibold text-purple-400">${stats.limit}</div>
+                                <div class="text-xs text-slate-400">Limite max</div>
+                            </div>
+                            <div class="text-center">
+                                <div class="text-lg font-semibold ${stats.can_upload ? 'text-green-400' : 'text-red-400'}">${stats.can_upload ? 'Libre' : 'Plein'}</div>
+                                <div class="text-xs text-slate-400">Espace disponible</div>
+                            </div>
+                        </div>
+                    `;
+                }
+                
+            } catch (error) {
+                console.error('Erreur chargement stats:', error);
+                statsContainer.innerHTML = '<div class="text-center text-red-400">Erreur lors du chargement des statistiques</div>';
+            }
+        }
+
+        // Télécharger un fichier
+        async function downloadFile(fileId, filename) {
+            try {
+                const response = await fetch(`${API_BASE}/excel-management/download/${fileId}`);
+                
+                if (!response.ok) {
+                    throw new Error('Erreur lors du téléchargement');
+                }
+                
+                const blob = await response.blob();
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.style.display = 'none';
+                a.href = url;
+                a.download = filename;
+                document.body.appendChild(a);
+                a.click();
+                window.URL.revokeObjectURL(url);
+                document.body.removeChild(a);
+                
+                showToast('Téléchargement réussi', filename);
+                
+            } catch (error) {
+                console.error('Erreur téléchargement:', error);
+                showToast('Erreur', 'Impossible de télécharger le fichier');
+            }
+        }
+
+        // Supprimer un fichier
+        async function deleteFile(fileId) {
+            if (!confirm('Êtes-vous sûr de vouloir supprimer ce fichier ?')) {
+                return;
+            }
+            
+            try {
+                const response = await fetch(`${API_BASE}/excel-management/delete/${fileId}`, {
+                    method: 'DELETE'
+                });
+                
+                if (!response.ok) {
+                    throw new Error('Erreur lors de la suppression');
+                }
+                
+                showToast('Fichier supprimé', 'Le fichier a été supprimé avec succès');
+                loadFileHistory();
+                loadFileStats();
+                
+            } catch (error) {
+                console.error('Erreur suppression:', error);
+                showToast('Erreur', 'Impossible de supprimer le fichier');
+            }
+        }
+
+        // Actualiser l'historique
+        document.getElementById('refreshHistory').addEventListener('click', () => {
+            loadFileHistory();
+            loadFileStats();
+        });
+
+        // ===============================
+        // GESTION DES PARAMÈTRES
+        // ===============================
+
+        // Charger les paramètres
+        async function loadSettings() {
+            try {
+                const response = await fetch(`${API_BASE}/settings`);
+                
+                if (!response.ok) {
+                    throw new Error('Erreur lors du chargement des paramètres');
+                }
+                
+                const settings = await response.json();
+                populateSettings(settings);
+                updateSettingsStatus(settings);
+                
+            } catch (error) {
+                console.error('Erreur chargement paramètres:', error);
+                showToast('Erreur', 'Impossible de charger les paramètres');
+            }
+        }
+
+        // Peupler les champs avec les paramètres
+        function populateSettings(settings) {
+            settings.forEach(setting => {
+                const element = document.getElementById(setting.setting_key);
+                if (element) {
+                    element.value = setting.setting_value;
+                }
+            });
+            
+            // Mettre à jour les champs individuels pour la base de données
+            const dbUrl = settings.find(s => s.setting_key === 'database_url');
+            if (dbUrl) {
+                parseDatabaseUrl(dbUrl.setting_value);
+            }
+        }
+
+        // Parser l'URL de base de données
+        function parseDatabaseUrl(url) {
+            try {
+                const match = url.match(/postgresql:\/\/([^:]+):([^@]+)@([^:]+):(\d+)\/(.+)/);
+                if (match) {
+                    document.getElementById('dbUser').value = match[1];
+                    document.getElementById('dbPassword').value = match[2];
+                    document.getElementById('dbHost').value = match[3];
+                    document.getElementById('dbPort').value = match[4];
+                    document.getElementById('dbName').value = match[5];
+                }
+            } catch (error) {
+                console.error('Erreur parsing URL:', error);
+            }
+        }
+
+        // Construire l'URL de base de données
+        function buildDatabaseUrl() {
+            const user = document.getElementById('dbUser').value;
+            const password = document.getElementById('dbPassword').value;
+            const host = document.getElementById('dbHost').value;
+            const port = document.getElementById('dbPort').value;
+            const database = document.getElementById('dbName').value;
+            
+            if (user && password && host && port && database) {
+                return `postgresql://${user}:${password}@${host}:${port}/${database}`;
+            }
+            return document.getElementById('databaseUrl').value;
+        }
+
+        // Tester la connexion
+        document.getElementById('testConnection').addEventListener('click', async () => {
+            const databaseUrl = buildDatabaseUrl();
+            
+            try {
+                const response = await fetch(`${API_BASE}/settings/database_url`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        setting_key: 'database_url',
+                        setting_value: databaseUrl,
+                        updated_by: 'user'
+                    })
+                });
+                
+                if (response.ok) {
+                    showToast('Connexion testée', 'Configuration de base de données mise à jour');
+                    updateSettingsStatus([{
+                        setting_key: 'database_url',
+                        setting_value: databaseUrl
+                    }]);
+                } else {
+                    throw new Error('Erreur lors du test');
+                }
+                
+            } catch (error) {
+                console.error('Erreur test connexion:', error);
+                showToast('Erreur', 'Impossible de tester la connexion');
+            }
+        });
+
+        // Sauvegarder les paramètres de base de données
+        document.getElementById('databaseSettingsForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const databaseUrl = buildDatabaseUrl();
+            
+            try {
+                const response = await fetch(`${API_BASE}/settings/database_url`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        setting_key: 'database_url',
+                        setting_value: databaseUrl,
+                        updated_by: 'user'
+                    })
+                });
+                
+                if (response.ok) {
+                    showToast('Configuration sauvegardée', 'Paramètres de base de données mis à jour');
+                } else {
+                    throw new Error('Erreur lors de la sauvegarde');
+                }
+                
+            } catch (error) {
+                console.error('Erreur sauvegarde DB:', error);
+                showToast('Erreur', 'Impossible de sauvegarder la configuration');
+            }
+        });
+
+        // Sauvegarder les paramètres de fichiers
+        document.getElementById('fileSettingsForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const settings = [
+                {
+                    key: 'excel_storage_path',
+                    value: document.getElementById('storagePath').value
+                },
+                {
+                    key: 'max_files_per_hotel',
+                    value: document.getElementById('maxFiles').value
+                },
+                {
+                    key: 'auto_cleanup_enabled',
+                    value: document.getElementById('autoCleanup').checked ? 'true' : 'false'
+                }
+            ];
+            
+            try {
+                for (const setting of settings) {
+                    await fetch(`${API_BASE}/settings/${setting.key}`, {
+                        method: 'PUT',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            setting_key: setting.key,
+                            setting_value: setting.value,
+                            updated_by: 'user'
+                        })
+                    });
+                }
+                
+                showToast('Configuration sauvegardée', 'Paramètres de fichiers mis à jour');
+                loadSettings(); // Recharger pour mettre à jour l'affichage
+                
+            } catch (error) {
+                console.error('Erreur sauvegarde fichiers:', error);
+                showToast('Erreur', 'Impossible de sauvegarder la configuration');
+            }
+        });
+
+        // Mettre à jour l'état des paramètres
+        function updateSettingsStatus(settings) {
+            const dbStatus = document.getElementById('dbStatus');
+            const storageStatus = document.getElementById('storageStatus');
+            const securityStatus = document.getElementById('securityStatus');
+            
+            // Base de données
+            const dbSetting = settings.find(s => s.setting_key === 'database_url');
+            if (dbSetting && dbSetting.setting_value && dbSetting.setting_value !== 'postgresql://user:password@localhost:5432/hotelmanager') {
+                dbStatus.innerHTML = '<div class="text-slate-400">Statut: <span class="text-green-400">Configuré</span></div>';
+            } else {
+                dbStatus.innerHTML = '<div class="text-slate-400">Statut: <span class="text-amber-400">Non configuré</span></div>';
+            }
+            
+            // Stockage
+            const storageSetting = settings.find(s => s.setting_key === 'excel_storage_path');
+            const maxFilesSetting = settings.find(s => s.setting_key === 'max_files_per_hotel');
+            
+            if (storageSetting && maxFilesSetting) {
+                storageStatus.innerHTML = `
+                    <div class="text-slate-400">Chemin: <span class="text-slate-300">${storageSetting.setting_value}</span></div>
+                    <div class="text-slate-400">Max fichiers: <span class="text-slate-300">${maxFilesSetting.setting_value}</span></div>
+                `;
+            }
+            
+            // Sécurité
+            const cleanupSetting = settings.find(s => s.setting_key === 'auto_cleanup_enabled');
+            if (cleanupSetting) {
+                const isActive = cleanupSetting.setting_value === 'true';
+                securityStatus.innerHTML = `
+                    <div class="text-slate-400">Nettoyage auto: <span class="${isActive ? 'text-green-400' : 'text-red-400'}">${isActive ? 'Actif' : 'Inactif'}</span></div>
+                    <div class="text-slate-400">Historique: <span class="text-slate-300">${maxFilesSetting ? maxFilesSetting.setting_value : '10'} fichiers</span></div>
+                `;
+            }
+        }
+
+        // Fonctions utilitaires pour les autres onglets
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            return date.toLocaleDateString('fr-FR', {
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric'
+            });
+        }
+
+        function formatPrice(price) {
+            return new Intl.NumberFormat('fr-FR', {
+                style: 'currency',
+                currency: 'EUR'
+            }).format(price);
+        }
+
+        // Initialisation
+        document.addEventListener('DOMContentLoaded', () => {
+            feather.replace();
+            
+            // Charger l'endpoint sauvegardé
+            const savedApiBase = localStorage.getItem('apiBase');
+            if (savedApiBase) {
+                document.getElementById('apiBase').value = savedApiBase;
+            }
+            
+            // Définir les dates par défaut
+            const today = new Date();
+            const thirtyDaysAgo = new Date(today.getTime() - 30 * 24 * 60 * 60 * 1000);
+            
+            document.getElementById('trackStart').value = thirtyDaysAgo.toISOString().split('T')[0];
+            document.getElementById('trackEnd').value = today.toISOString().split('T')[0];
+            document.getElementById('simStart').value = thirtyDaysAgo.toISOString().split('T')[0];
+            document.getElementById('simEnd').value = today.toISOString().split('T')[0];
+            
+            // Valeurs par défaut pour les paramètres
+            document.getElementById('storagePath').value = '/tmp/hotel_excel_storage';
+            document.getElementById('maxFiles').value = '10';
+        });
+    </script>
+</body>
+</html>
