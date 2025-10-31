@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>HotelManager Pro Codex</title>
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.min.css"
+    />
+    <link rel="stylesheet" href="assets/styles.css" />
+  </head>
+  <body>
+    <header class="hero">
+      <nav class="container-fluid">
+        <ul>
+          <li><strong>HotelManager Pro Codex</strong></li>
+        </ul>
+        <ul>
+          <li><a href="#exports">Exports</a></li>
+          <li><a href="#pricing">Suivi tarifs</a></li>
+          <li><a href="#excel">Fichiers Excel</a></li>
+        </ul>
+      </nav>
+      <div class="container hero-content">
+        <h1>Suite revenue management prête à l'emploi</h1>
+        <p>
+          Pilotez vos simulations tarifaires, exports avancés et fichiers de référence
+          depuis une console moderne et responsive.
+        </p>
+        <a class="contrast outline" href="#exports">Démarrer</a>
+      </div>
+    </header>
+
+    <main class="container">
+      <section id="exports" class="panel">
+        <div class="panel-header">
+          <h2>Exports intelligents</h2>
+          <p>
+            Générer un fichier Excel complet à partir de vos simulations ou
+            prévisions de réservation.
+          </p>
+        </div>
+        <div class="grid">
+          <article>
+            <h3>Simulation tarifaire</h3>
+            <p>
+              Déclenchez l'export en quelques clics avec des données de démo
+              modifiables.
+            </p>
+            <button id="export-simulation" class="primary">Exporter la simulation</button>
+          </article>
+          <article>
+            <h3>Simulation de réservation</h3>
+            <p>
+              Produisez un rapport d'occupation prévisionnel pour vos équipes
+              revenue et ventes.
+            </p>
+            <button id="export-reservation" class="secondary">Exporter les prévisions</button>
+          </article>
+        </div>
+      </section>
+
+      <section id="pricing" class="panel">
+        <div class="panel-header">
+          <h2>Suivi dynamique des tarifs</h2>
+          <p>
+            Simulez plusieurs scénarios, visualisez les analytics et partagez une
+            base commune avec vos partenaires.
+          </p>
+        </div>
+        <form id="pricing-form" class="grid">
+          <label>
+            Prix de base (€)
+            <input type="number" name="base_price" value="130" min="50" step="5" required />
+          </label>
+          <label>
+            Type de chambre
+            <select name="room_type">
+              <option>Double Classique</option>
+              <option>Suite Junior</option>
+              <option>Suite Deluxe</option>
+              <option>Suite Présidentielle</option>
+            </select>
+          </label>
+          <label>
+            Plan tarifaire
+            <select name="plan_name">
+              <option>OTA RO FLEX</option>
+              <option>Direct Flexible</option>
+              <option>Non-Refundable</option>
+              <option>Early Bird</option>
+              <option>Last Minute</option>
+            </select>
+          </label>
+          <label>
+            Nombre de jours
+            <input type="number" name="days" value="14" min="3" max="60" />
+          </label>
+          <button type="submit">Simuler</button>
+        </form>
+        <article class="analytics" id="pricing-result">
+          <p class="placeholder">Lancez une simulation pour afficher les résultats.</p>
+        </article>
+      </section>
+
+      <section id="excel" class="panel">
+        <div class="panel-header">
+          <h2>Gestion documentaire</h2>
+          <p>Centralisez vos fichiers de référence et ajustez la configuration globale.</p>
+        </div>
+        <form id="upload-form" class="grid">
+          <label>
+            Identifiant hôtel
+            <input type="text" name="hotel_id" placeholder="hotel-demo" required />
+          </label>
+          <label>
+            Fichier Excel
+            <input type="file" name="file" accept=".xlsx,.xls" required />
+          </label>
+          <button type="submit">Téléverser</button>
+        </form>
+        <article>
+          <header>
+            <h3>Historique</h3>
+          </header>
+          <div id="history" class="history"></div>
+        </article>
+        <article>
+          <header>
+            <h3>Paramètres globaux</h3>
+          </header>
+          <form id="settings-form" class="grid small-grid">
+            <label>
+              Nom de l'hôtel
+              <input type="text" name="hotel_name" />
+            </label>
+            <label>
+              Devise
+              <input type="text" name="currency" />
+            </label>
+            <label>
+              Locale
+              <input type="text" name="locale" />
+            </label>
+            <label>
+              Partenaire par défaut
+              <input type="text" name="default_partner" />
+            </label>
+            <button type="submit" class="secondary">Mettre à jour</button>
+          </form>
+        </article>
+      </section>
+    </main>
+
+    <footer class="footer">
+      <div class="container">
+        <small>© <span id="year"></span> HotelManager Pro Codex · Design moderne et responsive</small>
+      </div>
+    </footer>
+
+    <dialog id="toast"></dialog>
+
+    <script src="assets/main.js" type="module"></script>
+  </body>
+</html>
